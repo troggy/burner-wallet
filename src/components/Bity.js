@@ -125,8 +125,7 @@ class Bity extends Component {
       web3,
       changeView,
       setReceipt,
-      changeAlert,
-      toDollars
+      changeAlert
     } = this.props;
     let { amount } = this.state.fields;
 
@@ -135,7 +134,8 @@ class Bity extends Component {
 
       let order;
 
-      amount.value = toDollars(amount.value);
+      // NOTE: We've converted amount while the user was typing already to USD.
+      // Hence, there's not need to do anything here!
       const amountInEth = (amount.value / ethPrice).toString();
       try {
         order = await placeOrder(
@@ -319,8 +319,19 @@ class Bity extends Component {
           }
         });
       } else if (input === "amount") {
-        const amount = parseFloat(this.refs.amount.value);
-        const { ethPrice, ethBalance, currencyDisplay } = this.props;
+        const {
+          ethPrice,
+          ethBalance,
+          currencyDisplay,
+          convertCurrency
+        } = this.props;
+
+        const displayCurrency = localStorage.getItem("currency");
+        const amount = convertCurrency(
+          parseFloat(this.refs.amount.value),
+          `USD/${displayCurrency}`
+        );
+
         const min = MIN_AMOUNT_DOLLARS;
         const max = parseFloat(ethPrice) * parseFloat(ethBalance);
 

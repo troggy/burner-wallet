@@ -8,7 +8,6 @@ import {
   Text,
   Select,
   Flex,
-  Box,
   Checkbox
 } from 'rimble-ui'
 import { PrimaryButton, BorderButton } from '../components/Buttons'

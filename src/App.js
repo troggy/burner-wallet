@@ -155,16 +155,16 @@ export default class App extends Component {
     this.longPoll = this.longPoll.bind(this)
     this.queryExchangeWithNativeCurrency = this.queryExchangeWithNativeCurrency.bind(this)
     this.setPossibleNewPrivateKey = this.setPossibleNewPrivateKey.bind(this)
+    this.currencyDisplay = this.currencyDisplay.bind(this);
+    this.convertCurrency = this.convertCurrency.bind(this);
   }
 
   // NOTE: This function is for _displaying_ a currency value to a user. It
   // adds a currency unit to the beginning or end of the number!
-  currencyDisplay = (amount, toParts) => {
-    // NOTE: For some reason, this function seems to take very long.
-    const { exchangeRate } = this.state;
-    const locale = localStorage.getItem('i18nextLng');
-    const symbol = localStorage.getItem('currency') || Object.keys(exchangeRate)[0];
-    const convertedAmount = this.fromDollars(amount);
+  currencyDisplay(amount, toParts) {
+    const locale = localStorage.getItem('i18nextLng') 
+    const symbol = localStorage.getItem('currency');
+    const convertedAmount = this.convertCurrency(amount, `${symbol}/USD`);
 
     const formatter = new Intl.NumberFormat(locale, {
       style: 'currency',
@@ -174,20 +174,31 @@ export default class App extends Component {
     return toParts ? formatter.formatToParts(convertedAmount) : formatter.format(convertedAmount);
   }
 
-  // `fromDollars` and `toDollars` is used to convert floats from one currency
-  // to another without adding a currency unit symbol.
-  fromDollars = amount => {
-    const { exchangeRate } = this.state
-    const rate = Object.values(exchangeRate)[0];
+  /*
+   * Pair is supposed to be a currency pair according to ISO 4217. Format must
+   * be BASE/COUNTER.
+   *
+   * convertCurrency then ALWAYS converts from COUNTER => BASE. Amount must
+   * be quoted in the base currency. An example:
+   *
+   * convertCurrency(1, "EUR/USD"):
+   * returns (0.81 / 1) * $1, so essentially converts $1 to 0.81€.
+   *
+   * or
+   *
+   * convertCurrency(1, "USD/EUR"):
+   * returns (1 / 0.81) * €1, so essentially converts €1 to 1.23$.
+   *
+   * NOTE: This function assumes 1 DAI = 1 USD!
+   */
+  convertCurrency(amount, pair) {
+    const { exchangeRate } = this.state;
+    const [base, counter] = pair.split("/");
 
-    return amount * rate;
-  }
+    const baseRate = exchangeRate[base];
+    const counterRate = exchangeRate[counter];
 
-  toDollars = amount => {
-    const { exchangeRate } = this.state
-    const rate = Object.values(exchangeRate)[0];
-
-    return amount / rate;
+    return baseRate / counterRate * amount;
   }
 
   parseAndCleanPath(path){
@@ -383,24 +394,17 @@ export default class App extends Component {
       })
   }
 
-  queryExchangeWithNativeCurrency() {
-    let currency = localStorage.getItem('currency') || CONFIG.CURRENCY.DEFAULT_CURRENCY
-    if (currency === "USD") {
-      // NOTE: 1 DAI === 1 USD. Veritas in numeris! :)
-      this.setState({
-        exchangeRate: {
-          USD: 1
-        }
-      });
-    } else {
-      fetch(`https://min-api.cryptocompare.com/data/price?fsym=DAI&tsyms=${currency}`)
-        .then(response => response.json())
-        .then(response => {
-          this.setState({
-            'exchangeRate': response
-          })
-        })
-    }
+  async queryExchangeWithNativeCurrency() {
+    const currencies = CONFIG.CURRENCY.CURRENCY_LIST;
+    currencies.slice(currencies.indexOf("USD"), 1);
+
+    // https://min-api.cryptocompare.com/documentation?key=Price&cat=multipleSymbolsPriceEndpoint
+    const resp = await fetch(`https://min-api.cryptocompare.com/data/price?fsym=DAI&tsyms=${currencies.join(",")}`)
+    let pairs = await resp.json();
+    // 1 DAI == 1 USD. In numeris veritas!
+    pairs.USD = 1;
+
+    this.setState({ exchangeRate: pairs });
   }
 
   setPossibleNewPrivateKey(value){
@@ -1034,7 +1038,7 @@ export default class App extends Component {
                             changeView={this.changeView.bind(this)}
                             setReceipt={this.setReceipt.bind(this)}
                             currencyDisplay={this.currencyDisplay}
-                            toDollars={this.toDollars}
+                            convertCurrency={this.convertCurrency}
                           />
                         </Card>
                         <Bottom
@@ -1125,7 +1129,7 @@ export default class App extends Component {
                           changeAlert={this.changeAlert}
                           convertExchangeRate={this.convertExchangeRate}
                           currencyDisplay={this.currencyDisplay}
-                          toDollars={this.toDollars}
+                          convertCurrency={this.convertCurrency}
                         />
                       </Card>
                       <Bottom
@@ -1213,7 +1217,7 @@ export default class App extends Component {
                             changeView={this.changeView}
                             changeAlert={this.changeAlert}
                             currencyDisplay={this.currencyDisplay}
-                            toDollars={this.toDollars}
+                            convertCurrency={this.convertCurrency}
                             transactionsByAddress={this.state.transactionsByAddress}
                             fullTransactionsByAddress={this.state.fullTransactionsByAddress}
                             fullRecentTxs={this.state.fullRecentTxs}
@@ -1351,7 +1355,7 @@ export default class App extends Component {
                           balance={balance}
                           goBack={this.goBack.bind(this)}
                           currencyDisplay={this.currencyDisplay}
-                          toDollars={this.toDollars}
+                          convertCurrency={this.convertCurrency}
                           tokenSendV2={tokenSendV2.bind(this)}
                         />
                       </Card>
