@@ -90,7 +90,6 @@ const MAX_BLOCK_TO_LOOK_BACK = 512//don't look back more than 512 blocks
 
 let interval
 let intervalLong
-let exchangeRatesQueryTimer
 
 const Warning = styled(Text).attrs(()=>({
   fontSize: 2,
@@ -332,7 +331,6 @@ export default class App extends Component {
     // NOTE: We query once before starting the interval to define the value
     // for the UI, as it needs to be readily available for the user.
     this.queryExchangeWithNativeCurrency(CONFIG.CURRENCY.EXCHANGE_RATE_QUERY);
-    exchangeRatesQueryTimer = setInterval(this.queryExchangeWithNativeCurrency, CONFIG.CURRENCY.EXCHANGE_RATE_QUERY)
     setTimeout(this.longPoll,150)
 
     this.connectToRPC()
@@ -352,7 +350,6 @@ export default class App extends Component {
   componentWillUnmount() {
     clearInterval(interval)
     clearInterval(intervalLong)
-    clearInterval(exchangeRatesQueryTimer)
     window.removeEventListener("resize", this.updateDimensions.bind(this));
   }
 
