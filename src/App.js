@@ -161,17 +161,20 @@ export default class App extends Component {
 
   // NOTE: This function is for _displaying_ a currency value to a user. It
   // adds a currency unit to the beginning or end of the number!
-  currencyDisplay(amount, toParts) {
+  currencyDisplay(amount, toParts=false, convert=true) {
     const locale = localStorage.getItem('i18nextLng') 
     const symbol = localStorage.getItem('currency');
-    const convertedAmount = this.convertCurrency(amount, `${symbol}/USD`);
+
+    if (convert) {
+      amount = this.convertCurrency(amount, `${symbol}/USD`);
+    }
 
     const formatter = new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: symbol,
       maximumFractionDigits: 2
     });
-    return toParts ? formatter.formatToParts(convertedAmount) : formatter.format(convertedAmount);
+    return toParts ? formatter.formatToParts(amount) : formatter.format(amount);
   }
 
   /*

@@ -28,18 +28,19 @@ export default class SendToAddress extends React.Component {
           toAddress,
           currency
         },
-        //convertCurrency
+        convertCurrency
       } = props;
 
       let { scannerState: { amount } } = props;
 
-      //// NOTE: Two users could have different display currencies, which is why
-      //// at this point we'll have to adjust the requested amount for the user
-      //// sending money.
-      //const displayCurrency = localStorage.getItem("currency");
-      //if (currency !== displayCurrency) {
-      //  amount = convertCurrency(displayCurrency, currency);
-      //}
+      // NOTE: Two users could have different display currencies, which is why
+      // at this point we'll have to adjust the requested amount for the user
+      // sending money.
+      const displayCurrency = localStorage.getItem("currency");
+      if (currency !== displayCurrency) {
+        amount = convertCurrency(amount, `${displayCurrency}/${currency}`)
+                  .toFixed(2);
+      }
 
       initialState = {
         amount,
@@ -140,9 +141,10 @@ export default class SendToAddress extends React.Component {
 
   send = async () => {
     let { toAddress, amount } = this.state;
-    let { toDollars, currencyDisplay } = this.props
+    let { convertCurrency, currencyDisplay } = this.props
 
-    amount = toDollars(amount);
+    const displayCurrency = localStorage.getItem("currency");
+    amount = convertCurrency(amount, `USD/${displayCurrency}`);
     console.log("CONVERTED TO DOLLAR AMOUNT",amount)
 
     if(this.state.canSend){

@@ -30,13 +30,16 @@ export default class RequestFunds extends React.Component {
   };
 
   request = () => {
-    if(this.state.canRequest){
+    const { changeAlert } = this.props;
+    const { amount, canRequest } = this.state;
+
+    if(canRequest){
       this.setState({
-        requested:true,
-        amount: this.props.toDollars(this.state.amount)
+        requested: true,
+        amount
       })
     }else{
-      this.props.changeAlert({type: 'warning', message: 'Please enter a valid amount'})
+      changeAlert({type: 'warning', message: 'Please enter a valid amount'})
     }
   };
 
@@ -63,7 +66,10 @@ export default class RequestFunds extends React.Component {
           }}>
           <div style={{width:"100%",textAlign:'center'}}>
             <div style={{fontSize:30,cursor:"pointer",textAlign:"center",width:"100%"}}>
-              {currencyDisplay(amount)}
+              {/* NOTE: We don't need to convert here, as the user already put
+                * in the amount in their local currency.
+                */}
+              {currencyDisplay(amount, false, false)}
             </div>
 
             <div style={{cursor:"pointer",textAlign:"center",width:"100%"}}>
