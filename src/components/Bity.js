@@ -8,15 +8,10 @@ import styled from "styled-components";
 import { isValid } from "iban";
 import { placeOrder, getOrder, getEstimate } from "../services/bity";
 import { price } from "../services/ethgasstation";
+import InputInfo from "./InputInfo";
 
 const P = styled.p`
   color: gray;
-`;
-
-const Error = styled.span`
-  padding: 6px 0 0 0;
-  color: red;
-  font-size: 0.7em;
 `;
 
 // See: https://doc.bity.com/exchange/v2.html#place-an-order
@@ -393,7 +388,9 @@ class Bity extends Component {
                 fields.name.valid === null || fields.name.valid ? "grey" : "red"
               }
             />
-            {fields.name.message ? <Error>{fields.name.message}</Error> : null}
+            {fields.name.message ? (
+              <InputInfo color="red">{fields.name.message}</InputInfo>
+            ) : null}
           </Field>
           <Field mb={3} label="IBAN">
             <Input
@@ -407,7 +404,9 @@ class Bity extends Component {
                 fields.IBAN.valid === null || fields.IBAN.valid ? "grey" : "red"
               }
             />
-            {fields.IBAN.message ? <Error>{fields.IBAN.message}</Error> : null}
+            {fields.IBAN.message ? (
+              <InputInfo color="red">{fields.IBAN.message}</InputInfo>
+            ) : null}
           </Field>
           <Field mb={3} label={i18n.t("offramp.form.amount")}>
             <Input
@@ -423,7 +422,7 @@ class Bity extends Component {
               placeholder={currencyDisplay(0)}
             />
             {fields.amount.message ? (
-              <Error>{fields.amount.message}</Error>
+              <InputInfo color="red">{fields.amount.message}</InputInfo>
             ) : null}
           </Field>
         </Box>
