@@ -129,9 +129,9 @@ export default class App extends Component {
       ethprice: 0.00,
       hasUpdateOnce: false,
       possibleNewPrivateKey: '',
-      // NOTE: USD in exchangeRate is undefined, such that any result using this
+      // NOTE: USD in exchangeRates is undefined, such that any result using this
       // number becomes NaN intentionally until it's defined.
-      exchangeRate: {}
+      exchangeRates: {}
     };
     this.alertTimeout = null;
 
@@ -195,11 +195,11 @@ export default class App extends Component {
    * NOTE: This function assumes 1 DAI = 1 USD!
    */
   convertCurrency(amount, pair) {
-    const { exchangeRate } = this.state;
+    const { exchangeRates } = this.state;
     const [base, counter] = pair.split("/");
 
-    const baseRate = exchangeRate[base];
-    const counterRate = exchangeRate[counter];
+    const baseRate = exchangeRates[base];
+    const counterRate = exchangeRates[counter];
 
     return baseRate / counterRate * amount;
   }
@@ -407,7 +407,7 @@ export default class App extends Component {
     // 1 DAI == 1 USD. In numeris veritas!
     pairs.USD = 1;
 
-    this.setState({ exchangeRate: pairs });
+    this.setState({ exchangeRates: pairs });
   }
 
   setPossibleNewPrivateKey(value){
