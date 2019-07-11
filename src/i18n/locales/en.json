@@ -54,7 +54,8 @@
       "to_address": "To Address",
       "send_amount": "Send Amount",
       "notice": "You can only send ",
-      "error": "Please enter a valid address or ENS."
+      "error": "Please enter a valid address or ENS.",
+      "currency_error": "Please update your burner-wallet to a newer version that supports currency conversion."
     },
     "send_by_scan": {
       "try_again": "Please try again",

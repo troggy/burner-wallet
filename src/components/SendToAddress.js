@@ -11,6 +11,7 @@ import {
   Input,
 } from 'rimble-ui';
 import { PrimaryButton, BorderButton } from "./Buttons";
+import InputInfo from "./InputInfo";
 
 export default class SendToAddress extends React.Component {
 
@@ -26,28 +27,44 @@ export default class SendToAddress extends React.Component {
           message,
           extraMessage,
           toAddress,
-          currency
         },
-        convertCurrency
+        convertCurrency,
+        changeAlert
       } = props;
 
-      let { scannerState: { amount } } = props;
+      let { scannerState: { amount, currency } } = props;
+      let currencyWarning = false;
+      let requestedAmount = 0;
 
       // NOTE: Two users could have different display currencies, which is why
       // at this point we'll have to adjust the requested amount for the user
       // sending money.
       const displayCurrency = localStorage.getItem("currency");
+      if (!currency) {
+          changeAlert({type: "warning", message: i18n.t("send_to_address.currency_error")});
+          currencyWarning = false;
+          amount = requestedAmount = 0;
+          // NOTE: We're setting currency equal to displayCurrency here to not
+          // trigger the next condition, as that would set currencyWarning to
+          // true again.
+          currency = displayCurrency;
+      }
       if (currency !== displayCurrency) {
+        requestedAmount = amount;
         amount = convertCurrency(amount, `${displayCurrency}/${currency}`)
                   .toFixed(2);
+        currencyWarning = true;
       }
 
       initialState = {
         amount,
+        requestedAmount,
         message,
         extraMessage,
         toAddress,
-        currency
+        currency,
+        currencyWarning,
+        displayCurrency
       }
     } else {
       const { amount, message, extraMessage } = props
@@ -299,6 +316,21 @@ export default class SendToAddress extends React.Component {
 
           <Field mb={3} label={i18n.t('send_to_address.send_amount')}>
             {amountInputDisplay}
+            {
+              /* TODO: i18n this with merging PR #195 */
+              this.state.currencyWarning ?
+                <InputInfo
+                  color="blue">
+                  You've been requested to send
+                  {" "+new Intl.NumberFormat(localStorage.getItem('i18nextLng'), {
+                    style: 'currency',
+                    currency: this.state.currency,
+                    maximumFractionDigits: 2
+                  }).format(this.state.requestedAmount)}.
+                  We've converted this amount according to our latest known exchange rate to {this.state.displayCurrency}.
+                </InputInfo>
+                : null
+            }
           </Field>
 
           <Field mb={3} label={messageText}>
