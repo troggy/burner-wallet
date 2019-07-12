@@ -314,25 +314,27 @@ export default class SendToAddress extends React.Component {
             </CopyToClipboard>
           }</div>
 
-          <Field mb={3} label={i18n.t('send_to_address.send_amount')}>
+          <Field mb={3} label={i18n.t("send_to_address.send_amount")}>
             {amountInputDisplay}
-            {
-              /* TODO: i18n this with merging PR #195 */
-              this.state.currencyWarning ?
-                <InputInfo
-                  color="blue">
-                  You've been requested to send
-                  {" "+new Intl.NumberFormat(localStorage.getItem('i18nextLng'), {
-                    style: 'currency',
+            {/* TODO: i18n this with merging PR #195 */
+            this.state.currencyWarning ? (
+              <InputInfo color="blue">
+                {" "}
+                {`You've been requested to send ${new Intl.NumberFormat(
+                  localStorage.getItem("i18nextLng"),
+                  {
+                    style: "currency",
                     currency: this.state.currency,
                     maximumFractionDigits: 2
-                  }).format(this.state.requestedAmount)}.
-                  We've converted this amount according to our latest known exchange rate to {this.state.displayCurrency}.
-                </InputInfo>
-                : null
-            }
-          </Field>
+                  }
+                ).format(this.state.requestedAmount)}.  We've converted this
+                            amount according to our latest known exchange rate to
+                              ${this.state.displayCurrency}.
 
+                            `}
+              </InputInfo>
+            ) : null}
+          </Field>
           <Field mb={3} label={messageText}>
             <Input
               width={1}

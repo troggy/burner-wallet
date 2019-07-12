@@ -45,7 +45,13 @@ export default class RequestFunds extends React.Component {
 
   render() {
     let { canRequest, message, amount, requested } = this.state;
-    let { currencyDisplay, view, buttonStyle, address, changeView } = this.props
+    let {
+      currencyDisplay,
+      view,
+      buttonStyle,
+      address,
+      changeView,
+    } = this.props
     if(requested){
 
       let url = window.location.protocol+"//"+window.location.hostname
@@ -57,7 +63,7 @@ export default class RequestFunds extends React.Component {
       message = encodeURI(message).replaceAll("#","%23").replaceAll(";","%3B").replaceAll(":","%3A").replaceAll("/","%2F");
       const currency = localStorage.getItem("currency");
 
-      let qrValue = url+"/"+this.props.address+";"+amount+";"+message+";"+currency;
+      const qrValue = `${url}/${address};${amount};${message};${currency}`;
 
       return (
         <div>
