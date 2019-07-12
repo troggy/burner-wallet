@@ -8,9 +8,6 @@ import { Text } from "rimble-ui";
 const StyledBalance = styled.div`
   text-align: center;
   padding: 40px 0 20px;
-  margin: -17px -17px 20px -17px;
-  background: var(--primary);
-  color: white;
 
   .otherAssets {
     color: var(--dark-text);
