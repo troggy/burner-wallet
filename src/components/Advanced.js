@@ -158,11 +158,11 @@ export default class Advanced extends React.Component {
 
     return (
       <div style={{marginTop:20}}>
-        <Flex py='10px' alignItems='center' justifyContent='space-between'>
+        <Flex py={3} alignItems='center' justifyContent='space-between'>
           <Text>{i18n.t('currency.label')}</Text>
           <Select items={CURRENCY.CURRENCY_LIST} onChange={this.updateCurrency} value={currency}/>
         </Flex>
-        <Flex py='10px' alignItems='center' justifyContent='space-between'>
+        <Flex py={3} alignItems='center' justifyContent='space-between'>
           <Text>Enable advanced features</Text>
           <Checkbox onChange={this.updateAdvancedBalance} checked={expertMode} />
         </Flex>
