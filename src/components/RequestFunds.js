@@ -30,26 +30,40 @@ export default class RequestFunds extends React.Component {
   };
 
   request = () => {
-    if(this.state.canRequest){
+    const { changeAlert } = this.props;
+    const { amount, canRequest } = this.state;
+
+    if(canRequest){
       this.setState({
-        requested:true,
-        amount: this.props.toDollars(this.state.amount)
+        requested: true,
+        amount
       })
     }else{
-      this.props.changeAlert({type: 'warning', message: 'Please enter a valid amount'})
+      changeAlert({type: 'warning', message: 'Please enter a valid amount'})
     }
   };
 
   render() {
     let { canRequest, message, amount, requested } = this.state;
-    let { currencyDisplay, view, buttonStyle, address, changeView } = this.props
+    let {
+      currencyDisplay,
+      view,
+      buttonStyle,
+      address,
+      changeView,
+    } = this.props
     if(requested){
 
       let url = window.location.protocol+"//"+window.location.hostname
       if(window.location.port&&window.location.port!==80&&window.location.port!==443){
         url = url+":"+window.location.port
       }
-      let qrValue = url+"/"+this.props.address+";"+amount+";"+encodeURI(message).replaceAll("#","%23").replaceAll(";","%3B").replaceAll(":","%3A").replaceAll("/","%2F")
+
+      // TODO: Understand why these `replaceAll`s are used here.
+      message = encodeURI(message).replaceAll("#","%23").replaceAll(";","%3B").replaceAll(":","%3A").replaceAll("/","%2F");
+      const currency = localStorage.getItem("currency");
+
+      const qrValue = `${url}/${address};${amount};${message};${currency}`;
 
       return (
         <div>
@@ -58,7 +72,10 @@ export default class RequestFunds extends React.Component {
           }}>
           <div style={{width:"100%",textAlign:'center'}}>
             <div style={{fontSize:30,cursor:"pointer",textAlign:"center",width:"100%"}}>
-              {currencyDisplay(amount)}
+              {/* NOTE: We don't need to convert here, as the user already put
+                * in the amount in their local currency.
+                */}
+              {currencyDisplay(amount, false, false)}
             </div>
 
             <div style={{cursor:"pointer",textAlign:"center",width:"100%"}}>

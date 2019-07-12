@@ -54,7 +54,8 @@
       "to_address": "An Adresse",
       "send_amount": "Betrag senden",
       "notice": "Du kannst nur folgenden Betrag senden: ",
-      "error": "Bitte eine gültige Adresse oder ENS eingeben."
+      "error": "Bitte eine gültige Adresse oder ENS eingeben.",
+      "currency_error": "Bitte aktualisiere deine burner-wallet zu einer neuen Version die Währungsumrechnung unterstützt."
     },
     "send_by_scan": {
       "try_again": "Bitte versuchen Sie es erneut",

@@ -11,6 +11,7 @@ import {
   Input,
 } from 'rimble-ui';
 import { PrimaryButton, BorderButton } from "./Buttons";
+import InputInfo from "./InputInfo";
 
 export default class SendToAddress extends React.Component {
 
@@ -21,12 +22,49 @@ export default class SendToAddress extends React.Component {
 
     let initialState;
     if (props.scannerState) {
-      const { amount, message, extraMessage, toAddress } = props.scannerState
+      const {
+        scannerState: {
+          message,
+          extraMessage,
+          toAddress,
+        },
+        convertCurrency,
+        changeAlert
+      } = props;
+
+      let { scannerState: { amount, currency } } = props;
+      let currencyWarning = false;
+      let requestedAmount = 0;
+
+      // NOTE: Two users could have different display currencies, which is why
+      // at this point we'll have to adjust the requested amount for the user
+      // sending money.
+      const displayCurrency = localStorage.getItem("currency");
+      if (!currency) {
+          changeAlert({type: "warning", message: i18n.t("send_to_address.currency_error")});
+          currencyWarning = false;
+          amount = requestedAmount = 0;
+          // NOTE: We're setting currency equal to displayCurrency here to not
+          // trigger the next condition, as that would set currencyWarning to
+          // true again.
+          currency = displayCurrency;
+      }
+      if (currency !== displayCurrency) {
+        requestedAmount = amount;
+        amount = convertCurrency(amount, `${displayCurrency}/${currency}`)
+                  .toFixed(2);
+        currencyWarning = true;
+      }
+
       initialState = {
         amount,
+        requestedAmount,
         message,
         extraMessage,
-        toAddress
+        toAddress,
+        currency,
+        currencyWarning,
+        displayCurrency
       }
     } else {
       const { amount, message, extraMessage } = props
@@ -37,6 +75,7 @@ export default class SendToAddress extends React.Component {
         toAddress: ""
       }
     }
+
 
     initialState.fromEns = ""
     initialState.canSend = false
@@ -119,9 +158,10 @@ export default class SendToAddress extends React.Component {
 
   send = async () => {
     let { toAddress, amount } = this.state;
-    let { toDollars, currencyDisplay } = this.props
+    let { convertCurrency, currencyDisplay } = this.props
 
-    amount = toDollars(amount);
+    const displayCurrency = localStorage.getItem("currency");
+    amount = convertCurrency(amount, `USD/${displayCurrency}`);
     console.log("CONVERTED TO DOLLAR AMOUNT",amount)
 
     if(this.state.canSend){
@@ -274,10 +314,27 @@ export default class SendToAddress extends React.Component {
             </CopyToClipboard>
           }</div>
 
-          <Field mb={3} label={i18n.t('send_to_address.send_amount')}>
+          <Field mb={3} label={i18n.t("send_to_address.send_amount")}>
             {amountInputDisplay}
-          </Field>
+            {/* TODO: i18n this with merging PR #195 */
+            this.state.currencyWarning ? (
+              <InputInfo color="blue">
+                {" "}
+                {`You've been requested to send ${new Intl.NumberFormat(
+                  localStorage.getItem("i18nextLng"),
+                  {
+                    style: "currency",
+                    currency: this.state.currency,
+                    maximumFractionDigits: 2
+                  }
+                ).format(this.state.requestedAmount)}.  We've converted this
+                            amount according to our latest known exchange rate to
+                              ${this.state.displayCurrency}.
 
+                            `}
+              </InputInfo>
+            ) : null}
+          </Field>
           <Field mb={3} label={messageText}>
             <Input
               width={1}

@@ -1,8 +1,7 @@
 const configs = [
   {
-    DOMAINS: ["localhost", "10.0.0.107", "sundai.fritz.box"],
+    DOMAINS: ["localhost", "10.0.0.107", "sundai.fritz.box", "192.168.178.25"],
     CURRENCY: {
-      EXCHANGE_RATE_QUERY: 5000,
       CURRENCY_LIST: ["EUR", "USD", "GBP"],
       DEFAULT_CURRENCY: "USD"
     },
