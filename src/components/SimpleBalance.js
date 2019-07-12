@@ -7,7 +7,9 @@ import { Text } from "rimble-ui";
 
 const StyledBalance = styled.div`
   text-align: center;
-  padding: 40px 0 20px;
+  padding: 20px 0;
+
+  color: var(--primary);
 
   .otherAssets {
     color: var(--dark-text);
@@ -50,15 +52,18 @@ export default ({ mainAmount, otherAmounts, currencyDisplay }) => {
   const parts = currencyDisplay(mainAmount, true);
 
   return (
-    <StyledBalance>
-      {parts.map(({ type, value }) => (
-        <Text.span className={type}>{value}</Text.span>
-      ))}
-      {otherAssetsTotal > 0 && (
-        <Text className="otherAssets" italic fontSize={1} textAlign="center">
-          +{currencyDisplay(otherAssetsTotal)} in other assets
-        </Text>
-      )}
-    </StyledBalance>
+    <>
+      <StyledBalance>
+        {parts.map(({ type, value }) => (
+          <Text.span className={type}>{value}</Text.span>
+        ))}
+        {otherAssetsTotal > 0 && (
+          <Text className="otherAssets" italic fontSize={1} textAlign="center">
+            +{currencyDisplay(otherAssetsTotal)} in other assets
+          </Text>
+        )}
+      </StyledBalance>
+      <hr />
+    </>
   );
 };
