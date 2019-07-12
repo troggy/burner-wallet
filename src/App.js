@@ -161,8 +161,8 @@ export default class App extends Component {
   // adds a currency unit to the beginning or end of the number!
   currencyDisplay = (amount, toParts) => {
     // NOTE: For some reason, this function seems to take very long.
-    const { exchangeRate } = this.state
-    const locale = localStorage.getItem('i18nextLng')
+    const { exchangeRate } = this.state;
+    const locale = localStorage.getItem('i18nextLng');
     const symbol = localStorage.getItem('currency') || Object.keys(exchangeRate)[0];
     const convertedAmount = this.fromDollars(amount);
 
