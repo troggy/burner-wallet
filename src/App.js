@@ -18,6 +18,7 @@ import Receive from './components/Receive'
 import Share from './components/Share'
 import ShareLink from './components/ShareLink'
 import Balance from "./components/Balance";
+import SimpleBalance from "./components/SimpleBalance";
 import Receipt from "./components/Receipt";
 import MainCard from './components/MainCard';
 import History from './components/History';
@@ -158,18 +159,19 @@ export default class App extends Component {
 
   // NOTE: This function is for _displaying_ a currency value to a user. It
   // adds a currency unit to the beginning or end of the number!
-  currencyDisplay = amount => {
+  currencyDisplay = (amount, toParts) => {
     // NOTE: For some reason, this function seems to take very long.
-    const { exchangeRate } = this.state
-    const locale = localStorage.getItem('i18nextLng') 
+    const { exchangeRate } = this.state;
+    const locale = localStorage.getItem('i18nextLng');
     const symbol = localStorage.getItem('currency') || Object.keys(exchangeRate)[0];
     const convertedAmount = this.fromDollars(amount);
 
-    return new Intl.NumberFormat(locale, {
+    const formatter = new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: symbol,
-      maximumFractionDigits: 2 
-    }).format(convertedAmount)
+      maximumFractionDigits: 2
+    });
+    return toParts ? formatter.formatToParts(convertedAmount) : formatter.format(convertedAmount);
   }
 
   // `fromDollars` and `toDollars` is used to convert floats from one currency
@@ -249,7 +251,6 @@ export default class App extends Component {
     })
   }
   componentDidMount(){
-
     document.body.style.backgroundColor = mainStyle.backgroundColor
 
     this.detectContext()
@@ -333,7 +334,7 @@ export default class App extends Component {
     }
     this.setState({mainnetweb3,daiContract,bridgeContract})
   }
-  
+
   componentWillUnmount() {
     clearInterval(interval)
     clearInterval(intervalLong)
@@ -720,6 +721,10 @@ export default class App extends Component {
     }
   }
   render() {
+    const expertMode = localStorage.getItem("expertMode") === "true"
+      // Right now "expertMode" is enabled by default. To disable it by default, remove the following line.
+      || localStorage.getItem("expertMode") === null;
+
     let {
       web3, account, gwei, block, avgBlockTime, etherscan, balance, metaAccount, burnMetaAccount, view, alert, send
     } = this.state;
@@ -825,6 +830,7 @@ export default class App extends Component {
                     buttonStyle={buttonStyle}
                     changeView={this.changeView}
                     isVendor={this.state.isVendor&&this.state.isVendor.isAllowed}
+                    expertMode={expertMode}
                   />
                 )
 
@@ -847,7 +853,7 @@ export default class App extends Component {
                   return (
                     <div>
                       <Card>
-                        <NavCard 
+                        <NavCard
                           title={i18n.t('history_chat')}
                           goBack={this.goBack.bind(this)}/>
                         {defaultBalanceDisplay}
@@ -889,10 +895,10 @@ export default class App extends Component {
                         <NavCard
                           title={i18n.t('offramp.history.title')}
                           goBack={this.goBack.bind(this)}/>
-                        <BityHistory 
+                        <BityHistory
                           changeAlert={this.changeAlert}
                           address={this.state.account}
-                          orderId={orderId} 
+                          orderId={orderId}
                         />
                       </Card>
                       <Bottom
@@ -943,9 +949,10 @@ export default class App extends Component {
                       <Card>
                         {extraTokens}
 
+                        {expertMode ? (<>
                         <Balance
                           icon={pdai}
-                          text={"PDAI"} 
+                          text={"PDAI"}
                           amount={this.state.xdaiBalance}
                           address={account}
                           currencyDisplay={this.currencyDisplay}/>
@@ -963,6 +970,12 @@ export default class App extends Component {
                           amount={parseFloat(this.state.ethBalance) * parseFloat(this.state.ethprice)}
                           address={account}
                           currencyDisplay={this.currencyDisplay}/>
+                        </>) : (
+                          <SimpleBalance
+                            mainAmount={this.state.xdaiBalance}
+                            otherAmounts={{DAI: this.state.daiBalance, ETH: parseFloat(this.state.ethBalance) * parseFloat(this.state.ethprice)}}
+                            currencyDisplay={this.currencyDisplay} />
+                        )}
 
                         {/* eslint-disable-next-line jsx-a11y/accessible-emoji */}
                         <Warning>💀 This product is currently in early alpha. Use at your own risk! 💀</Warning>

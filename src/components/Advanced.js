@@ -8,6 +8,8 @@ import {
   Text,
   Select,
   Flex,
+  Box,
+  Checkbox
 } from 'rimble-ui'
 import { PrimaryButton, BorderButton } from '../components/Buttons'
 import getConfig from '../config'
@@ -21,13 +23,17 @@ export default class Advanced extends React.Component {
       privateKeyQr:false,
       seedPhraseHidden:true,
       privateKeyHidden:true,
-      currency: ''
+      currency: '',
+      expertMode:false
     }
   }
 
   componentDidMount() {
     let currency = localStorage.getItem('currency')
-    this.setState({ currency })
+    const expertMode = localStorage.getItem("expertMode") === "true"
+      // Right now "expertMode" is enabled by default. To disable it by default, remove the following line.
+      || localStorage.getItem("expertMode") === null;
+    this.setState({ currency, expertMode })
   }
 
   updateCurrency = e => {
@@ -36,9 +42,15 @@ export default class Advanced extends React.Component {
     localStorage.setItem('currency', value)
   }
 
+  updateAdvancedBalance= e => {
+    let { checked } = e.target
+    this.setState({ expertMode: checked })
+    localStorage.setItem('expertMode', checked)
+  }
+
   render(){
     let {isVendor, balance, privateKey, changeAlert, changeView, setPossibleNewPrivateKey} = this.props
-    let { currency } = this.state
+    let { currency, expertMode } = this.state
 
     let url = window.location.protocol+"//"+window.location.hostname
     if(window.location.port&&window.location.port!==80&&window.location.port!==443){
@@ -146,34 +158,36 @@ export default class Advanced extends React.Component {
 
     return (
       <div style={{marginTop:20}}>
-      <Flex alignItems='center' justifyContent='space-between' width={1}>
-        <Text>{i18n.t('currency.label')}</Text>
-        <Select items={CURRENCY.CURRENCY_LIST} onChange={this.updateCurrency} value={currency}/>
-      </Flex>
-      <hr style={{paddingTop:20}}/>
-      <div>
-        <div style={{width:"100%",textAlign:"center"}}><h5>Learn More</h5></div>
-        <div className="content ops row settings-row" style={{marginBottom:10}}>
-          <a href="https://github.com/leapdao/burner-wallet" style={{color:"#FFFFFF"}} target="_blank" rel="noopener noreferrer">
-            <BorderButton width={1}>
-              <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
-                <i className="fas fa-code"/> {i18n.t('code')}
-              </Scaler>
-            </BorderButton>
-          </a>
-          <a href="https://leapdao.org/" style={{color:"#FFFFFF"}} target="_blank" rel="noopener noreferrer">
-            <BorderButton width={1}>
-              <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
-                <i className="fas fa-info"/> {i18n.t('about')}
-              </Scaler>
-            </BorderButton>
-          </a>
+        <Flex py={3} alignItems='center' justifyContent='space-between'>
+          <Text>{i18n.t('currency.label')}</Text>
+          <Select items={CURRENCY.CURRENCY_LIST} onChange={this.updateCurrency} value={currency}/>
+        </Flex>
+        <Flex py={3} alignItems='center' justifyContent='space-between'>
+          <Text>Enable advanced features</Text>
+          <Checkbox onChange={this.updateAdvancedBalance} checked={expertMode} />
+        </Flex>
+        <hr style={{paddingTop:20}}/>
+        <div>
+          <div style={{width:"100%",textAlign:"center"}}><h5>Learn More</h5></div>
+          <div className="content ops row settings-row" style={{marginBottom:10}}>
+            <a href="https://github.com/leapdao/burner-wallet" style={{color:"#FFFFFF"}} target="_blank" rel="noopener noreferrer">
+              <BorderButton width={1}>
+                <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
+                  <i className="fas fa-code"/> {i18n.t('code')}
+                </Scaler>
+              </BorderButton>
+            </a>
+            <a href="https://leapdao.org/" style={{color:"#FFFFFF"}} target="_blank" rel="noopener noreferrer">
+              <BorderButton width={1}>
+                <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
+                  <i className="fas fa-info"/> {i18n.t('about')}
+                </Scaler>
+              </BorderButton>
+            </a>
+          </div>
         </div>
-      </div>
 
-      <hr style={{paddingTop:20}}/>
-
-
+        <hr style={{paddingTop:20}}/>
 
         {privateKey && !isVendor &&
         <div>
