@@ -417,7 +417,7 @@ class Bity extends Component {
           </Field>
         </Box>
         <P color="red">
-          You're using an early alpha produc! The following loading dialogue is
+          You're using an early alpha product! The following loading dialogue is
           unfortunately really fragile and needs to remain uninterrupted for the
           whole process. So, please don't close it abruptly. If you need help,
           please reach out to someone at leapdao.org. We're working on a much
