@@ -81,7 +81,9 @@
       "invalid_to_amount": "Bitte einen gültige Betrag eingeben",
       "calculate_gas_price": "Berechne den besten Gas-Preis...",
       "go_to_etherscan": "Auf Etherscan gehen?",
-      "idk": "ich weiß nicht wie es hier weitergeht? vielleicht irgendetwas was die bridge erklärt?"
+      "idk": "ich weiß nicht wie es hier weitergeht? vielleicht irgendetwas was die bridge erklärt?",
+      "fast_exit_swap": "Dieser Währungswechsel wird in zwei Transaktionen stattfinden.",
+      "fast_exit_patience": "Wechsel erfolgreich eingeleitet. Du wirst deinen DAI umgehend erhalten."
     },
     "request_funds": {
       "item_message": "Gegenstand oder Nachricht",

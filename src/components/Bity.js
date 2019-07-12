@@ -10,7 +10,7 @@ import { placeOrder, getOrder, getEstimate } from "../services/bity";
 import { price } from "../services/ethgasstation";
 
 const P = styled.p`
-  color: gray;
+  color: ${props => (props.color ? props.color : "grey")};
 `;
 
 const Error = styled.span`
@@ -416,6 +416,13 @@ class Bity extends Component {
             ) : null}
           </Field>
         </Box>
+        <P color="red">
+          You're using an early alpha produc! The following loading dialogue is
+          unfortunately really fragile and needs to remain uninterrupted for the
+          whole process. So, please don't close it abruptly. If you need help,
+          please reach out to someone at leapdao.org. We're working on a much
+          better and more reliable cashout dialogue!
+        </P>
         <PrimaryButton
           size={"large"}
           width={1}
