@@ -6,6 +6,7 @@ import { BorderButton } from "./Buttons";
 export default ({
   isVendor,
   changeView,
+  expertMode
 }) => {
   let exchangeButton;
 
@@ -41,7 +42,7 @@ export default ({
 
   return (
     <Flex mx={-2}>
-      <Box width={[1, 1/2, 1/2]} m={2}>
+      <Box flex={1} m={2}>
         <BorderButton
           fullWidth
           onClick={() => {
@@ -54,7 +55,7 @@ export default ({
           </Flex>
         </BorderButton>
       </Box>
-      <Box width={[1, 1/2, 1/2]} m={2}>{exchangeButton}</Box>
+      {isVendor || expertMode ? <Box flex={1} m={2}>{exchangeButton}</Box> : null}
     </Flex>
   );
 };

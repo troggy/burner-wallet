@@ -1,0 +1,52 @@
+import React from 'react';
+import styled from 'styled-components';
+import { Text } from "rimble-ui";
+
+// Some of the
+const StyledBalance = styled.div`
+text-align: center;
+padding: 40px 0 20px;
+margin: -17px -17px 20px -17px;
+background: var(--primary);
+color: white;
+
+.otherAssets {
+  color: var(--dark-text);
+}
+
+span {
+  font-size: 200%;
+}
+
+.integer {
+  font-size: 400%;
+}
+
+.group {}
+
+.decimal {}
+
+.fraction {}
+
+.literal {}
+
+.currency {
+  font-size: 100%;
+}
+`
+
+export default ({mainAmount, otherAmounts, currencyDisplay}) => {
+  if(isNaN(mainAmount) || typeof mainAmount === "undefined"){
+    mainAmount = 0.00
+  }
+
+  const otherAssetsTotal = Object.values(otherAmounts).reduce((acc, curr) => acc + parseInt(curr, 10), 0);
+  const parts = currencyDisplay(mainAmount, true);
+
+  return (
+    <StyledBalance>
+      {parts.map(({type, value}) => <Text.span className={type}>{value}</Text.span>)}
+      {otherAssetsTotal > 0 && <Text className="otherAssets" italic fontSize={1} textAlign="center">+{currencyDisplay(otherAssetsTotal)} in other assets</Text>}
+    </StyledBalance>
+  )
+};
