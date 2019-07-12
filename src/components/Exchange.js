@@ -882,9 +882,20 @@ export default class Exchange extends React.Component {
                 // Then we convert that value to wei
                 amount = bi(amount * 10 ** 18);
 
+                 this.setState({
+                  // NOTE: Technically we're not "depositing" but that was the
+                  // only way I was able to make the loading bar show up...
+                  daiToXdaiMode:"depositing",
+                  loaderBarStatusText: i18n.t('exchange.fast_exit_swap'),
+                  loaderBarColor:"#3efff8",
+                  loaderBarPercent:30,
+                  loaderBarStartTime: Date.now(),
+                  loaderBarClick:()=>{
+                    // noop
+                  }
+                })
                 if(this.state.xdaiMetaAccount){
                   //send funds using metaaccount on xdai
-
                   const signer = {
                     signTx: (tx) => {
                       const privKeys = tx.inputs.map(_ => this.state.xdaiMetaAccount.privateKey);
@@ -913,7 +924,19 @@ export default class Exchange extends React.Component {
                   ).then(rsp => {
                     console.log(rsp);
                     this.updatePendingExits(this.state.daiAddress, this.state.xdaiweb3);
+                    this.setState({
+                      loaderBarStatusText: i18n.t('exchange.fast_exit_patience'),
+                      loaderBarPercent:75,
+                      loaderBarStartTime: Date.now(),
+                      loaderBarClick:()=>{
+                        // noop
+                      }
+                    })
                     this.setState({ amount: "", daiToXdaiMode: false });
+                    this.props.changeAlert({
+                      type: "success",
+                      message: i18n.t("exchange.fast_exit_patience")
+                    });
                   }).catch(err => {
                     console.log(err);
                     this.props.changeAlert({
@@ -937,7 +960,14 @@ export default class Exchange extends React.Component {
                     ).then(rsp => {
                       console.log(rsp);
                       this.updatePendingExits(this.state.daiAddress, this.state.xdaiweb3);
-                      this.setState({ amount: "", daiToXdaiMode: false });
+                      this.props.changeAlert({
+                        type: "success",
+                        message: i18n.t("exchange.fast_exit_patience")
+                      });
+                      this.setState({
+                        amount: "",
+                        daiToXdaiMode: false
+                      });
                     }).catch(err => {
                       console.log(err);
                     });

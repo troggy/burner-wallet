@@ -11,7 +11,7 @@ import { price } from "../services/ethgasstation";
 import InputInfo from "./InputInfo";
 
 const P = styled.p`
-  color: gray;
+  color: ${props => (props.color ? props.color : "grey")};
 `;
 
 // See: https://doc.bity.com/exchange/v2.html#place-an-order
@@ -426,6 +426,13 @@ class Bity extends Component {
             ) : null}
           </Field>
         </Box>
+        <P color="red">
+          You're using an early alpha product! The following loading dialogue is
+          unfortunately really fragile and needs to remain uninterrupted for the
+          whole process. So, please don't close it abruptly. If you need help,
+          please reach out to someone at leapdao.org. We're working on a much
+          better and more reliable cashout dialogue!
+        </P>
         <PrimaryButton
           size={"large"}
           width={1}
