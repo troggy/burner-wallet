@@ -12,6 +12,7 @@ import {
 } from 'rimble-ui'
 import { PrimaryButton, BorderButton } from '../components/Buttons'
 import getConfig from '../config'
+import { getStoredValue, storeValues } from "../services/localStorage";
 
 const { CURRENCY } = getConfig()
 
@@ -28,23 +29,23 @@ export default class Advanced extends React.Component {
   }
 
   componentDidMount() {
-    let currency = localStorage.getItem('currency')
-    const expertMode = localStorage.getItem("expertMode") === "true"
+    let currency = getStoredValue('currency')
+    const expertMode = getStoredValue("expertMode") === "true"
       // Right now "expertMode" is enabled by default. To disable it by default, remove the following line.
-      || localStorage.getItem("expertMode") === null;
+      || getStoredValue("expertMode") === null;
     this.setState({ currency, expertMode })
   }
 
   updateCurrency = e => {
     let { value } = e.target
     this.setState({ currency: value })
-    localStorage.setItem('currency', value)
+    storeValues({ currency: value })
   }
 
   updateAdvancedBalance= e => {
     let { checked } = e.target
     this.setState({ expertMode: checked })
-    localStorage.setItem('expertMode', checked)
+    storeValues({ expertMode: checked })
   }
 
   render(){

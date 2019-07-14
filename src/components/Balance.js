@@ -1,10 +1,11 @@
 import React from 'react';
 import { Flex, Text, Image } from "rimble-ui";
+import { getStoredValue } from "../services/localStorage";
 
 export  default ({icon, text, amount, currencyDisplay}) => {
-  const expertMode = localStorage.getItem("expertMode") === "true"
+  const expertMode = getStoredValue("expertMode") === "true"
     // Right now "expertMode" is enabled by default. To disable it by default, remove the following line.
-    || localStorage.getItem("expertMode") === null;
+    || getStoredValue("expertMode") === null;
 
   let opacity = 1
 
