@@ -1,39 +1,60 @@
 import React from 'react';
 import { Flex, Text, Image } from "rimble-ui";
+import styled from 'styled-components'
+
+const Fiat = styled(Text).attrs(()=>({
+  fontSize: 4,
+  fontWeight: 4
+}))``;
+
+const Token = styled(Text).attrs(()=>({
+  fontSize: 1,
+}))`
+  color: var(--secondary-btn-text-color)
+`;
+
+const Amount = styled(Flex)`
+  flex-direction: column;
+  align-items: flex-end;
+`;
+
+const tokenDisplay = (amount, symbol = "", maximumFractionDigits = 10) => {
+  const locale = localStorage.getItem('i18nextLng')
+  const formatter = new Intl.NumberFormat(locale, {
+    maximumFractionDigits
+  });
+  return `${formatter.format(amount)} ${symbol}`
+};
 
 export  default ({icon, text, amount, currencyDisplay}) => {
-  const expertMode = localStorage.getItem("expertMode") === "true"
-    // Right now "expertMode" is enabled by default. To disable it by default, remove the following line.
-    || localStorage.getItem("expertMode") === null;
-
-  let opacity = 1
+  let opacity;
+  let fiatAmount;
+  let tokenAmount;
 
   if(isNaN(amount)){
     opacity = 0.25
+    fiatAmount = currencyDisplay(0);
+    tokenAmount = tokenDisplay(0);
+  }else{
+    opacity = 1
+    fiatAmount = currencyDisplay(amount);
+    tokenAmount = tokenDisplay(amount, text, 10);
   }
 
   return (
     <Flex opacity={opacity} justifyContent={"space-between"} alignItems={"center"} borderBottom={1} borderColor={"#DFDFDF"} mb={3} pb={3}>
-      {expertMode ? (
       <Flex alignItems={"center"}>
         <Image src={icon} height={"50px"} width={"50px"} mr={3} bg="transparent" />
         <Text>
           {text}
         </Text>
       </Flex>
-      ) : (
-        <Text>
-          Your balance
-        </Text>
-      )}
 
-      <Text fontSize={4}>
+      <Amount>
+        <Fiat>{fiatAmount}</Fiat>
+        <Token>{tokenAmount}</Token>
+      </Amount>
 
-      {/* NOTE: Sometimes the exchangeRate to fiat wasn't loaded yet and hence
-        * amount can become NaN. In this case, we simply pass 0 to
-        *  currencyDisplay.*/}
-        {isNaN(amount) ? currencyDisplay(0) : currencyDisplay(amount)}
-      </Text>
     </Flex>
   )
 };
