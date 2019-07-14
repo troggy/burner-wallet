@@ -2,7 +2,7 @@ const configs = [
   {
     DOMAINS: ["localhost", "10.0.0.107", "sundai.fritz.box", "192.168.178.25"],
     CURRENCY: {
-      CURRENCY_LIST: ["EUR", "USD", "GBP"],
+      CURRENCY_LIST: ["USD", "EUR", "GBP"],
       DEFAULT_CURRENCY: "USD"
     },
     SIDECHAIN: {
