@@ -162,8 +162,9 @@ export default class App extends Component {
   // NOTE: This function is for _displaying_ a currency value to a user. It
   // adds a currency unit to the beginning or end of the number!
   currencyDisplay(amount, toParts=false, convert=true) {
-    const locale = getStoredValue('i18nextLng')
-    const symbol = getStoredValue('currency');
+    const { account } = this.state;
+    const locale = getStoredValue('i18nextLng');
+    const symbol = getStoredValue('currency', account) || CONFIG.CURRENCY.DEFAULT_CURRENCY;
 
     if (convert) {
       amount = this.convertCurrency(amount, `${symbol}/USD`);
@@ -323,10 +324,13 @@ export default class App extends Component {
         }
       }
     }
-    let nativeCurrency = getStoredValue('currency')
-    if (nativeCurrency === null) {
-      storeValues({currency: CONFIG.CURRENCY.DEFAULT_CURRENCY})
+    if (this.state.account){
+      let nativeCurrency = getStoredValue('currency', this.state.account)
+      if (nativeCurrency === null) {
+        storeValues({currency: CONFIG.CURRENCY.DEFAULT_CURRENCY}, this.state.account)
+      }
     }
+
     interval = setInterval(this.poll,1500)
     intervalLong = setInterval(this.longPoll,45000)
     // NOTE: We query once before starting the interval to define the value
