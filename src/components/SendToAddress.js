@@ -30,7 +30,8 @@ export default class SendToAddress extends React.Component {
           toAddress,
         },
         convertCurrency,
-        changeAlert
+        changeAlert,
+        address,
       } = props;
 
       let { scannerState: { amount, currency } } = props;
@@ -40,7 +41,7 @@ export default class SendToAddress extends React.Component {
       // NOTE: Two users could have different display currencies, which is why
       // at this point we'll have to adjust the requested amount for the user
       // sending money.
-      const displayCurrency = getStoredValue("currency");
+      const displayCurrency = getStoredValue("currency", address);
       if (!currency) {
           changeAlert({type: "warning", message: i18n.t("send_to_address.currency_error")});
           currencyWarning = false;
@@ -159,9 +160,9 @@ export default class SendToAddress extends React.Component {
 
   send = async () => {
     let { toAddress, amount } = this.state;
-    let { convertCurrency, currencyDisplay } = this.props
+    let { address, convertCurrency, currencyDisplay } = this.props
 
-    const displayCurrency = getStoredValue("currency");
+    const displayCurrency = getStoredValue("currency", address);
     amount = convertCurrency(amount, `USD/${displayCurrency}`);
     console.log("CONVERTED TO DOLLAR AMOUNT",amount)
 

@@ -280,6 +280,7 @@ class Bity extends Component {
   }
 
   validate(input) {
+    const { address } = this.props;
     return () => {
       const { fields } = this.state;
       let newFields;
@@ -321,7 +322,7 @@ class Bity extends Component {
           convertCurrency
         } = this.props;
 
-        const displayCurrency = getStoredValue("currency");
+        const displayCurrency = getStoredValue("currency", address);
         const amount = convertCurrency(
           parseFloat(this.refs.amount.value),
           `USD/${displayCurrency}`
