@@ -11,6 +11,7 @@ import { OutlineButton } from 'rimble-ui'
 import Transaction from "ethereumjs-tx";
 import EthUtil from 'ethereumjs-util';
 import EthCrypto from 'eth-crypto';
+import { getStoredValue, storeValues } from "../services/localStorage";
 
 const CONFIG = getConfig();
 
@@ -56,8 +57,9 @@ export default class History extends React.Component {
     //try to turn on encryption
     if(counter--<=0){
       counter=10
+      const pKeyName = "publicKey" + target;
       if(!this.state["publicKey_"+target]){
-        let savedPublicKey = localStorage.getItem("publicKey"+target)
+        let savedPublicKey = getStoredValue(pKeyName)
         if(savedPublicKey){
           let update = {}
           update["publicKey_"+target] = savedPublicKey
@@ -87,7 +89,7 @@ export default class History extends React.Component {
                 let isValid = hashOfPublicKey.indexOf(theTx.from.toLowerCase().substring(2))
                 if(isValid>0){
                   console.log("SAVE PUBLIC KEY!!!",isValid,target,publicKey)
-                  localStorage.setItem("publicKey"+target,publicKey)
+                  storeValues({[ pKeyName ]: publicKey});
                   let update = {}
                   update["publicKey_"+target] = publicKey
                   this.setState(update)
@@ -142,7 +144,7 @@ export default class History extends React.Component {
       console.log("saving key ",key,"to the state")
       update[key]=this.state.newChat
       this.props.saveKey(update)
-      localStorage.setItem(key,this.state.newChat)
+      storeValues({[key]: this.state.newChat})
     }else{
       //rawdog
       message = this.props.web3.utils.utf8ToHex(this.state.newChat)
