@@ -26,10 +26,12 @@ export default class Advanced extends React.Component {
       currency: '',
       expertMode:false
     }
+    this.updateCurrency = this.updateCurrency.bind(this)
   }
 
   componentDidMount() {
-    let currency = getStoredValue('currency')
+    const { address } = this.props;
+    const currency = getStoredValue('currency', address) || CURRENCY.DEFAULT_CURRENCY;
     const expertMode = getStoredValue("expertMode") === "true"
       // Right now "expertMode" is enabled by default. To disable it by default, remove the following line.
       || getStoredValue("expertMode") === null;
@@ -37,9 +39,10 @@ export default class Advanced extends React.Component {
   }
 
   updateCurrency = e => {
+    const { address } = this.props;
     let { value } = e.target
     this.setState({ currency: value })
-    storeValues({ currency: value })
+    storeValues({ currency: value }, address)
   }
 
   updateAdvancedBalance= e => {

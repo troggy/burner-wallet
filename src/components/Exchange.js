@@ -279,7 +279,7 @@ export default class Exchange extends React.Component {
 
   }
   async sendDai(){
-    let { daiContract } = this.props;
+    let { daiContract, address } = this.props;
     const { pTx, changeAlert, daiBalance, web3, convertCurrency} = this.props;
     const {
       daiAddress,
@@ -289,7 +289,7 @@ export default class Exchange extends React.Component {
     } = this.state;
     let { daiSendAmount } = this.state;
 
-    const displayCurrency = getStoredValue("currency");
+    const displayCurrency = getStoredValue("currency", address);
     // NOTE: daiSendAmount needs to be a string!
     daiSendAmount = `${convertCurrency(daiSendAmount, `USD/${displayCurrency}`)}`;
 
@@ -541,6 +541,7 @@ export default class Exchange extends React.Component {
       daiAddress
     } = this.state;
     const {
+      address,
       ethprice,
       ethBalance,
       changeAlert,
@@ -549,7 +550,7 @@ export default class Exchange extends React.Component {
     } = this.props;
     let { ethSendAmount } = this.state;
 
-    const displayCurrency = getStoredValue("currency");
+    const displayCurrency = getStoredValue("currency", address);
     ethSendAmount = convertCurrency(ethSendAmount, `USD/${displayCurrency}`);
     let actualEthSendAmount = parseFloat(ethSendAmount)/parseFloat(ethprice)
 
@@ -722,6 +723,7 @@ export default class Exchange extends React.Component {
     }
   }
   render() {
+    const { address } = this.props;
     let {daiToXdaiMode,ethToDaiMode } = this.state
 
     let ethCancelButton = <BorderButton className="btn-cancel" onClick={()=>{
@@ -822,7 +824,7 @@ export default class Exchange extends React.Component {
                   }
                 })
 
-                const displayCurrency = getStoredValue("currency");
+                const displayCurrency = getStoredValue("currency", address);
                 amount = convertCurrency(amount, `USD/${displayCurrency}`);
                 // TODO: depositDai doesn't use the destination parameter anymore
                 // Remove it.
@@ -877,7 +879,7 @@ export default class Exchange extends React.Component {
                 let { amount } = this.state;
 
                 // First we convert from the current display value and
-                const displayCurrency = getStoredValue("currency");
+                const displayCurrency = getStoredValue("currency", address);
                 amount = convertCurrency(amount, `USD/${displayCurrency}`);
 
                 // Then we convert that value to wei
@@ -1063,7 +1065,7 @@ export default class Exchange extends React.Component {
               }
 
               // TODO: Error: Returned values aren't valid, did it run Out of Gas?
-              const displayCurrency = getStoredValue("currency");
+              const displayCurrency = getStoredValue("currency", address);
               amount = convertCurrency(amount, `USD/${displayCurrency}`);
 
               console.log("AMOUNT:", amount, "DAI BALANCE:", this.props.daiBalance)
@@ -1170,7 +1172,7 @@ export default class Exchange extends React.Component {
                 webToUse = this.state.mainnetweb3
               }
 
-              const displayCurrency = getStoredValue("currency");
+              const displayCurrency = getStoredValue("currency", address);
               amount = convertCurrency(amount, `USD/${displayCurrency}`);
 
               console.log("AMOUNT:", amount, "ETH BALANCE:", this.props.ethBalance)
