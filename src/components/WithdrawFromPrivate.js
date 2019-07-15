@@ -4,9 +4,14 @@ import { Scaler } from "dapparatus";
 import Blockies from 'react-blockies';
 import i18n from '../i18n';
 import {
-  Button,
-  Input as RInput,
+  Box,
+  Field,
+  Flex,
+  Input,
+  Text,
 } from 'rimble-ui'
+import { PrimaryButton } from "./Buttons";
+
 
 // TODO: Can this be state of SendToAddress?
 let pollInterval
@@ -164,49 +169,40 @@ export default class SendToAddress extends React.Component {
 
     return (
       <div>
-          <div className="content row">
-            <div className="form-group w-100">
-              <div className="form-group w-100">
-                <label htmlFor="amount_input">{i18n.t('withdraw_from_private.from_address')}</label>
-                <RInput
-                  width={1}
-                  type="text"
-                  placeholder="0x..."
-                  value={fromAddress} />
-              </div>
+        <Box mb={4}>
 
-              <div className="content bridge row">
-                  <div className="col-6 p-1 w-100">
-                    { <Blockies seed={fromAddress} scale={10} /> }
-                  </div>
-                  <div className="col-6 p-1 w-100">
-                    <div style={{fontSize:64,letterSpacing:-2,fontWeight:500,whiteSpace:"nowrap"}}>
-                      <Scaler config={{startZoomAt:1000,origin:"0% 50%"}}>
-                        {currencyDisplay(this.state.fromBalance)}
-                      </Scaler>
-                    </div>
-                  </div>
-              </div>
+          <Flex justifyContent="space-between" alignItems="center" mb={3}>
+            <Blockies seed={fromAddress} scale={10} />
+            <Text fontSize={5} fontWeight="bold">{currencyDisplay(this.state.fromBalance)}</Text>
+          </Flex>
 
-              <label htmlFor="amount_input">{i18n.t('withdraw_from_private.amount')}</label>
-              <div className="input-group">
-                <RInput
-                  width={1}
-                  type="number"
-                  placeholder={currencyDisplay(0)}
-                  value={this.state.amount}
-                  onChange={event => this.updateState('amount', event.target.value)} />
-              </div>
-              {products}
-            </div>
-            <Button
-              size={'large'}
+          <Field mb={3} label={i18n.t('withdraw_from_private.from_address')}>
+            <Input
               width={1}
-              disabled={!canWithdraw}
-              onClick={this.withdraw}>
-              {i18n.t('withdraw_from_private.withdraw')}
-            </Button>
-          </div>
+              type="text"
+              placeholder="0x..."
+              value={fromAddress}
+            />
+          </Field>
+
+          <Field mb={3} label={i18n.t('withdraw_from_private.amount')}>
+            <Input
+              width={1}
+              type="number"
+              placeholder={currencyDisplay(0)}
+              value={this.state.amount}
+              onChange={event => this.updateState('amount', event.target.value)}
+            />
+          </Field>
+          {products}
+        </Box>
+        <PrimaryButton
+          size={'large'}
+          width={1}
+          disabled={!canWithdraw}
+          onClick={this.withdraw}>
+          {i18n.t('withdraw_from_private.withdraw')}
+        </PrimaryButton>
       </div>
     )
   }
