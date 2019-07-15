@@ -44,7 +44,7 @@ import pdai from './assets/pdai.png';
 import base64url from 'base64url';
 import EthCrypto from 'eth-crypto';
 import styled from "styled-components";
-import { localStorageExists, getStoredValue, storeValues} from "./services/localStorage";
+import { getStoredValue, storeValues, eraseStoredValue } from "./services/localStorage";
 
 let LOADERIMAGE = burnerlogo
 let HARDCODEVIEW// = "loader"// = "receipt"
@@ -459,13 +459,20 @@ export default class App extends Component {
 
   }
   componentDidUpdate(prevProps, prevState) {
-    let { network, web3 } = this.state;
+    let { network, web3, account } = this.state;
     if (web3 && network !== prevState.network /*&& !this.checkNetwork()*/) {
       console.log("WEB3 DETECTED BUT NOT RIGHT NETWORK",web3, network, prevState.network);
       //this.changeAlert({
       //  type: 'danger',
       //  message: 'Wrong Network. Please use Custom RPC endpoint: https://dai.poa.network or turn off MetaMask.'
       //}, false)
+    }
+    if (prevState.account !== account){
+      const currency = getStoredValue('currency');
+      if (currency){
+        storeValues({currency}, account);
+        eraseStoredValue('currency');
+      }
     }
   };
   checkNetwork() {
