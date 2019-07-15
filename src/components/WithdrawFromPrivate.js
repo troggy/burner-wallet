@@ -181,6 +181,7 @@ export default class SendToAddress extends React.Component {
               width={1}
               type="text"
               placeholder="0x..."
+              spellcheck="false"
               value={fromAddress}
             />
           </Field>
