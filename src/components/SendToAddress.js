@@ -37,22 +37,29 @@ export default class SendToAddress extends React.Component {
 
       let { scannerState: { amount, currency } } = props;
       let currencyWarning = false;
-      let requestedAmount = 0;
+      let requestedAmount = "";
 
       // NOTE: Two users could have different display currencies, which is why
       // at this point we'll have to adjust the requested amount for the user
       // sending money.
       const displayCurrency = getStoredValue("currency", address);
-      if (!currency) {
-          changeAlert({type: "warning", message: i18n.t("send_to_address.currency_error")});
-          currencyWarning = false;
-          amount = requestedAmount = 0;
-          // NOTE: We're setting currency equal to displayCurrency here to not
-          // trigger the next condition, as that would set currencyWarning to
-          // true again.
-          currency = displayCurrency;
-      }
-      if (currency !== displayCurrency) {
+
+      // NOTE: In this case, we simply scan the "Receive" QR code
+      if (toAddress && !currency && !amount && !message) {
+        // NOTE: We're setting currency equal to displayCurrency here to not
+        // trigger the next condition, as that would set currencyWarning to
+        // true again.
+        currency = displayCurrency;
+
+      // NOTE: In this case, we scan the RequestFunds QR code and if "currency"
+      // is missing, we display a warning.
+      } else if (((toAddress && amount) || message) && !currency) {
+        changeAlert({type: "warning", message: i18n.t("send_to_address.currency_error")});
+        // NOTE: We're setting currency equal to displayCurrency here to not
+        // trigger the next condition, as that would set currencyWarning to
+        // true again.
+        currency = displayCurrency;
+      } else if (currency !== displayCurrency) {
         requestedAmount = amount;
         amount = convertCurrency(amount, `${displayCurrency}/${currency}`)
                   .toFixed(2);
@@ -135,18 +142,7 @@ export default class SendToAddress extends React.Component {
   }
   componentDidMount(){
     this.setState({ canSend: this.canSend() })
-    setTimeout(()=>{
-      if(!this.state.toAddress && this.addressInput){
-        this.addressInput.focus();
-      }else if(!this.state.amount && this.amountInput){
-        this.amountInput.focus();
-      }else if(this.messageInput){
-        this.messageInput.focus();
-        setTimeout(()=>{
-          this.scrollToBottom()
-        },30)
-      }
-    },350)
+    this.bounceToAmountIfReady();
   }
 
   canSend() {
