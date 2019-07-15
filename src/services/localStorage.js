@@ -1,6 +1,3 @@
-export const localStorageExists =
-  localStorage && typeof localStorage.setItem === "function";
-
 const getFieldName = (name, account) => (account ? `${account}${name}` : name);
 
 export const getStoredValue = (name, account) =>

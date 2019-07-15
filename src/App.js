@@ -1316,15 +1316,13 @@ export default class App extends Component {
                             if(RNMessageChannel){
                               RNMessageChannel.send("burn")
                             }
-                            if(localStorageExists){
-                              storeValues({
-                                loadedBlocksTop: "",
-                                metaPrivateKey: "",
-                                recentTxs: "",
-                                transactionsByAddress: "",
-                              }, this.state.account);
-                              this.setState({recentTxs:[],transactionsByAddress:{}})
-                            }
+                            storeValues({
+                              loadedBlocksTop: "",
+                              metaPrivateKey: "",
+                              recentTxs: "",
+                              transactionsByAddress: "",
+                            }, this.state.account);
+                            this.setState({recentTxs:[],transactionsByAddress:{}})
                           }}
                           />
                         </Card>
@@ -1447,59 +1445,48 @@ export default class App extends Component {
                       this.setState({parsingTheChain:true},async ()=>{
                         let upperBoundOfSearch = this.state.block
                         //parse through recent transactions and store in local storage
-
-                        if(localStorageExists){
-
-                          let initResult = this.initRecentTxs()
-                          let recentTxs = initResult[0]
-                          let transactionsByAddress = initResult[1]
-
-                          let loadedBlocksTop = this.state.loadedBlocksTop
-                          if(!loadedBlocksTop){
-                            loadedBlocksTop = getStoredValue("loadedBlocksTop", this.state.account)
-                          }
-                          //  Look back through previous blocks since this account
-                          //  was last online... this could be bad. We might need a
-                          //  central server keeping track of all these and delivering
-                          //  a list of recent transactions
-
-                          let updatedTxs = false
-                          if(!loadedBlocksTop || loadedBlocksTop<this.state.block){
-                            if(!loadedBlocksTop) loadedBlocksTop = Math.max(2,this.state.block-5)
-
-                            if(this.state.block - loadedBlocksTop > MAX_BLOCK_TO_LOOK_BACK){
-                              loadedBlocksTop = this.state.block-MAX_BLOCK_TO_LOOK_BACK
-                            }
-
-                            let paddedLoadedBlocks = parseInt(loadedBlocksTop)+BLOCKS_TO_PARSE_PER_BLOCKTIME
-                            //console.log("choosing the min of ",paddedLoadedBlocks,"and",this.state.block)
-                            let parseBlock=Math.min(paddedLoadedBlocks,this.state.block)
-
-                            //console.log("MIN:",parseBlock)
-                            upperBoundOfSearch = parseBlock
-                            console.log(" +++++++======== Parsing recent blocks ~"+this.state.block)
-                            //first, if we are still back parsing, we need to look at *this* block too
-                            if(upperBoundOfSearch<this.state.block){
-                              for(let b=this.state.block;b>this.state.block-6;b--){
-                                //console.log(" ++ Parsing *CURRENT BLOCK* Block "+b+" for transactions...")
-                                updatedTxs = (await this.parseBlocks(b,recentTxs,transactionsByAddress)) || updatedTxs
-                              }
-                            }
-                            console.log(" +++++++======== Parsing from "+loadedBlocksTop+" to "+upperBoundOfSearch+"....")
-                            while(loadedBlocksTop<parseBlock){
-                              //console.log(" ++ Parsing Block "+parseBlock+" for transactions...")
-                              updatedTxs = (await this.parseBlocks(parseBlock,recentTxs,transactionsByAddress)) || updatedTxs
-                              parseBlock--
-                            }
-                          }
-
-                          if(updatedTxs||!this.state.recentTxs){
-                            this.sortAndSaveTransactions(recentTxs,transactionsByAddress)
-                          }
-
-                          storeValues({loadedBlocksTop: upperBoundOfSearch}, this.state.account);
-                          this.setState({parsingTheChain:false,loadedBlocksTop:upperBoundOfSearch})
+                        let initResult = this.initRecentTxs()
+                        let recentTxs = initResult[0]
+                        let transactionsByAddress = initResult[1]
+                        let loadedBlocksTop = this.state.loadedBlocksTop
+                        if (!loadedBlocksTop) {
+                          loadedBlocksTop = getStoredValue("loadedBlocksTop", this.state.account)
                         }
+                        //  Look back through previous blocks since this account
+                        //  was last online... this could be bad. We might need a
+                        //  central server keeping track of all these and delivering
+                        //  a list of recent transactions
+                        let updatedTxs = false
+                        if (!loadedBlocksTop || loadedBlocksTop < this.state.block) {
+                          if (!loadedBlocksTop) loadedBlocksTop = Math.max(2, this.state.block - 5)
+                          if (this.state.block - loadedBlocksTop > MAX_BLOCK_TO_LOOK_BACK) {
+                            loadedBlocksTop = this.state.block - MAX_BLOCK_TO_LOOK_BACK
+                          }
+                          let paddedLoadedBlocks = parseInt(loadedBlocksTop) + BLOCKS_TO_PARSE_PER_BLOCKTIME
+                          //console.log("choosing the min of ",paddedLoadedBlocks,"and",this.state.block)
+                          let parseBlock = Math.min(paddedLoadedBlocks, this.state.block)
+                          //console.log("MIN:",parseBlock)
+                          upperBoundOfSearch = parseBlock
+                          console.log(" +++++++======== Parsing recent blocks ~" + this.state.block)
+                          //first, if we are still back parsing, we need to look at *this* block too
+                          if (upperBoundOfSearch < this.state.block) {
+                            for (let b = this.state.block; b > this.state.block - 6; b--) {
+                              //console.log(" ++ Parsing *CURRENT BLOCK* Block "+b+" for transactions...")
+                              updatedTxs = (await this.parseBlocks(b, recentTxs, transactionsByAddress)) || updatedTxs
+                            }
+                          }
+                          console.log(" +++++++======== Parsing from " + loadedBlocksTop + " to " + upperBoundOfSearch + "....")
+                          while (loadedBlocksTop < parseBlock) {
+                            //console.log(" ++ Parsing Block "+parseBlock+" for transactions...")
+                            updatedTxs = (await this.parseBlocks(parseBlock, recentTxs, transactionsByAddress)) || updatedTxs
+                            parseBlock--
+                          }
+                        }
+                        if (updatedTxs || !this.state.recentTxs) {
+                          this.sortAndSaveTransactions(recentTxs, transactionsByAddress)
+                        }
+                        storeValues({loadedBlocksTop: upperBoundOfSearch}, this.state.account);
+                        this.setState({parsingTheChain: false, loadedBlocksTop: upperBoundOfSearch})
                         //console.log("~~ DONE PARSING SET ~~")
                       })
                     }
