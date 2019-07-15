@@ -103,7 +103,13 @@ export default class SendToAddress extends React.Component {
 
   componentWillReceiveProps(newProps) {
     if (this.props.scannerState !== newProps.scannerState) {
-        this.setState(Object.assign(this.state, newProps.scannerState))
+        const { message,...rest } = newProps.scannerState;
+
+        this.setState({
+          ...this.state,
+          ...rest,
+          message: decodeURI(message)
+        })
     }
   }
 
