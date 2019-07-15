@@ -26,19 +26,24 @@ const tokenDisplay = (amount, symbol = "", maximumFractionDigits = 10) => {
   return `${formatter.format(amount)} ${symbol}`
 };
 
-export  default ({icon, text, amount, currencyDisplay}) => {
+export  default ({icon, text, amount, tokenAmount, currencyDisplay}) => {
   let opacity;
-  let fiatAmount;
-  let tokenAmount;
+  let fiatValue;
+  let tokenValue;
 
   if(isNaN(amount)){
-    opacity = 0.25
-    fiatAmount = currencyDisplay(0);
-    tokenAmount = tokenDisplay(0);
+    opacity = 0.25;
+
+    /* NOTE: Sometimes the exchangeRate to fiat wasn't loaded yet and hence
+    * amount can become NaN. In this case, we simply pass 0 to currencyDisplay
+    */
+
+    fiatValue = currencyDisplay(0);
+    tokenValue = tokenDisplay(0);
   }else{
-    opacity = 1
-    fiatAmount = currencyDisplay(amount);
-    tokenAmount = tokenDisplay(amount, text, 10);
+    opacity = 1;
+    fiatValue = currencyDisplay(amount);
+    tokenValue = tokenDisplay(tokenAmount || amount, text, 10);
   }
 
   return (
@@ -51,8 +56,8 @@ export  default ({icon, text, amount, currencyDisplay}) => {
       </Flex>
 
       <Amount>
-        <Fiat>{fiatAmount}</Fiat>
-        <Token>{tokenAmount}</Token>
+        <Fiat>{fiatValue}</Fiat>
+        <Token>{tokenValue}</Token>
       </Amount>
 
     </Flex>
