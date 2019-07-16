@@ -18,18 +18,22 @@ const Amount = styled(Flex)`
   align-items: flex-end;
 `;
 
-const tokenDisplay = (amount, symbol = "", maximumFractionDigits = 10) => {
+const tokenDisplay = (amount, symbol = "", maximumFractionDigits = 2) => {
   const locale = localStorage.getItem('i18nextLng')
   const formatter = new Intl.NumberFormat(locale, {
-    maximumFractionDigits
+    minimumFractionDigits: 2,
+    maximumFractionDigits: maximumFractionDigits,
   });
   return `${formatter.format(amount)} ${symbol}`
 };
+
+const valuableTokens = ["ETH"]
 
 export  default ({icon, text, amount, tokenAmount, currencyDisplay}) => {
   let opacity;
   let fiatValue;
   let tokenValue;
+  const floatNumbers = valuableTokens.includes(text) ? 5 : 2
 
   if(isNaN(amount)){
     opacity = 0.25;
@@ -43,7 +47,7 @@ export  default ({icon, text, amount, tokenAmount, currencyDisplay}) => {
   }else{
     opacity = 1;
     fiatValue = currencyDisplay(amount);
-    tokenValue = tokenDisplay(tokenAmount || amount, text, 10);
+    tokenValue = tokenDisplay(tokenAmount || amount, text, floatNumbers);
   }
 
   return (
