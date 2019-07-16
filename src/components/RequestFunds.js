@@ -61,7 +61,7 @@ export default class RequestFunds extends React.Component {
       }
 
       // TODO: Understand why these `replaceAll`s are used here.
-      message = encodeURI(message).replaceAll("#","%23").replaceAll(";","%3B").replaceAll(":","%3A").replaceAll("/","%2F");
+      const encodedMessage = encodeURI(message).replaceAll("#","%23").replaceAll(";","%3B").replaceAll(":","%3A").replaceAll("/","%2F");
       const currency = getStoredValue("currency", address);
 
       const qrValue = `${url}/${address};${amount};${encodedMessage};${currency}`;
