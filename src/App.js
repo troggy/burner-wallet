@@ -990,6 +990,7 @@ export default class App extends Component {
                           icon={eth}
                           text={"ETH"}
                           amount={parseFloat(this.state.ethBalance) * parseFloat(this.state.ethprice)}
+                          tokenAmount={this.state.ethBalance}
                           address={account}
                           currencyDisplay={this.currencyDisplay}/>
                         </>) : (
@@ -1044,6 +1045,7 @@ export default class App extends Component {
                               icon={eth}
                               text={"ETH"}
                               amount={parseFloat(this.state.ethBalance) * parseFloat(this.state.ethprice)}
+                              tokenAmount={this.state.ethBalance}
                               currencyDisplay={this.currencyDisplay}
                               address={account} />
                           </div>

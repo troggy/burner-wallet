@@ -727,14 +727,14 @@ export default class Exchange extends React.Component {
     let {daiToXdaiMode,ethToDaiMode } = this.state
 
     let ethCancelButton = <BorderButton className="btn-cancel" onClick={()=>{
-          this.setState({amount:"",ethToDaiMode:false})
+          this.setState({ethToDaiAmount:"",ethToDaiMode:false})
         }}>
       <i className="fas fa-times"/> {i18n.t('cancel')}
     </BorderButton>
 
     let daiCancelButton =
       <BorderButton className="btn-cancel" onClick={()=>{
-        this.setState({amount:"",daiToXdaiMode:false})
+        this.setState({daiToXdaiAmount:"",daiToXdaiMode:false})
       }}>
         <i className="fas fa-times"/> {i18n.t('cancel')}
       </BorderButton>
@@ -798,8 +798,8 @@ export default class Exchange extends React.Component {
                   type="number"
                   step="0.1"
                   placeholder={this.props.currencyDisplay(0)}
-                  value={this.state.amount}
-                  onChange={event => this.updateState('amount', event.target.value)} />
+                  value={this.state.daiToXdaiAmount}
+                  onChange={event => this.updateState('daiToXdaiAmount', event.target.value)} />
               </div>
             </div>
             {daiCancelButton}
@@ -807,14 +807,14 @@ export default class Exchange extends React.Component {
               className={"btn-send"}
               disabled={buttonsDisabled}
               onClick={()=>{
-                let { amount } = this.state;
+                let { daiToXdaiAmount } = this.state;
                 const { convertCurrency } = this.props;
-                console.log("AMOUNT:", amount,"DAI BALANCE:",this.props.daiBalance)
+                console.log("AMOUNT:", daiToXdaiAmount,"DAI BALANCE:",this.props.daiBalance)
 
                 this.setState({
                   daiToXdaiMode:"depositing",
                   xdaiBalanceAtStart:this.props.xdaiBalance,
-                  xdaiBalanceShouldBe:parseFloat(this.props.xdaiBalance)+parseFloat(this.state.amount),
+                  xdaiBalanceShouldBe:parseFloat(this.props.xdaiBalance)+parseFloat(this.state.daiToXdaiAmount),
                   loaderBarColor:"#3efff8",
                   loaderBarStatusText: i18n.t('exchange.calculate_gas_price'),
                   loaderBarPercent:0,
@@ -824,13 +824,13 @@ export default class Exchange extends React.Component {
                   }
                 })
 
-                const displayCurrency = getStoredValue("currency", address);
-                amount = convertCurrency(amount, `USD/${displayCurrency}`);
+                const displayCurrency = localStorage.getItem("currency");
+                let amount = convertCurrency(daiToXdaiAmount, `USD/${displayCurrency}`);
                 // TODO: depositDai doesn't use the destination parameter anymore
                 // Remove it.
                 this.depositDai(null, amount, "Sending funds to bridge...", () => {
                   this.setState({
-                    amount:"",
+                    daiToXdaiAmount:"",
                     loaderBarColor:"#4ab3f5",
                     loaderBarStatusText:"Waiting for bridge...",
                     loaderBarClick:()=>{
@@ -869,18 +869,18 @@ export default class Exchange extends React.Component {
                   type="number"
                   step="0.1"
                   placeholder={this.props.currencyDisplay(0)}
-                  value={this.state.amount}
-                  onChange={event => this.updateState('amount', event.target.value)} />
+                  value={this.state.daiToXdaiAmount}
+                  onChange={event => this.updateState('daiToXdaiAmount', event.target.value)} />
               </div>
             </div>
             {daiCancelButton}
             <PrimaryButton className={"btn-send"} disabled={buttonsDisabled} onClick={async ()=>{
                 const { convertCurrency } = this.props;
-                let { amount } = this.state;
+                let { daiToXdaiAmount } = this.state;
 
                 // First we convert from the current display value and
-                const displayCurrency = getStoredValue("currency", address);
-                amount = convertCurrency(amount, `USD/${displayCurrency}`);
+                const displayCurrency = localStorage.getItem("currency");
+                let amount = convertCurrency(daiToXdaiAmount, `USD/${displayCurrency}`);
 
                 // Then we convert that value to wei
                 amount = bi(amount * 10 ** 18);
@@ -935,7 +935,7 @@ export default class Exchange extends React.Component {
                         // noop
                       }
                     })
-                    this.setState({ amount: "", daiToXdaiMode: false });
+                    this.setState({ daiToXdaiAmount: "", daiToXdaiMode: false });
                     this.props.changeAlert({
                       type: "success",
                       message: i18n.t("exchange.fast_exit_patience")
@@ -968,7 +968,7 @@ export default class Exchange extends React.Component {
                         message: i18n.t("exchange.fast_exit_patience")
                       });
                       this.setState({
-                        amount: "",
+                        daiToXdaiAmount: "",
                         daiToXdaiMode: false
                       });
                     }).catch(err => {
@@ -1049,15 +1049,15 @@ export default class Exchange extends React.Component {
                   type="number"
                   step="0.1"
                   placeholder={this.props.currencyDisplay(0)}
-                  value={this.state.amount}
-                  onChange={event => this.updateState('amount', event.target.value)} />
+                  value={this.state.ethToDaiAmount}
+                  onChange={event => this.updateState('ethToDaiAmount', event.target.value)} />
               </div>
             </div>
             {ethCancelButton}
             <PrimaryButton disabled={buttonsDisabled} onClick={async ()=>{
               console.log("Using uniswap exchange to move ETH to DAI")
               const { convertCurrency } = this.props;
-              let { amount } = this.state;
+              let { ethToDaiAmount } = this.state;
 
               let webToUse = this.props.web3
               if(this.state.mainnetMetaAccount){
@@ -1065,8 +1065,8 @@ export default class Exchange extends React.Component {
               }
 
               // TODO: Error: Returned values aren't valid, did it run Out of Gas?
-              const displayCurrency = getStoredValue("currency", address);
-              amount = convertCurrency(amount, `USD/${displayCurrency}`);
+              const displayCurrency = localStorage.getItem("currency");
+              let amount = convertCurrency(ethToDaiAmount, `USD/${displayCurrency}`);
 
               console.log("AMOUNT:", amount, "DAI BALANCE:", this.props.daiBalance)
 
@@ -1118,7 +1118,7 @@ export default class Exchange extends React.Component {
                 "Sending funds to 🦄 exchange...",
                 (receipt)=>{
                   this.setState({
-                    amount:"",
+                    ethToDaiAmount:"",
                     loaderBarColor:"#4ab3f5",
                     loaderBarStatusText:"Waiting for 🦄 exchange...",
                     loaderBarClick:()=>{
@@ -1157,23 +1157,23 @@ export default class Exchange extends React.Component {
                   type="number"
                   step="0.1"
                   placeholder={this.props.currencyDisplay(0)}
-                  value={this.state.amount}
-                  onChange={event => this.updateState('amount', event.target.value)} />
+                  value={this.state.ethToDaiAmount}
+                  onChange={event => this.updateState('ethToDaiAmount', event.target.value)} />
               </div>
             </div>
             {ethCancelButton}
             <PrimaryButton className="btn-send" disabled={buttonsDisabled} onClick={async ()=>{
               console.log("Using uniswap exchange to move DAI to ETH")
               const { convertCurrency } = this.props;
-              let { amount } = this.state;
+              let { ethToDaiAmount } = this.state;
 
               let webToUse = this.props.web3
               if(this.state.mainnetMetaAccount){
                 webToUse = this.state.mainnetweb3
               }
 
-              const displayCurrency = getStoredValue("currency", address);
-              amount = convertCurrency(amount, `USD/${displayCurrency}`);
+              const displayCurrency = localStorage.getItem("currency");
+              let amount = convertCurrency(ethToDaiAmount, `USD/${displayCurrency}`);
 
               console.log("AMOUNT:", amount, "ETH BALANCE:", this.props.ethBalance)
 
@@ -1280,7 +1280,7 @@ export default class Exchange extends React.Component {
                                 if(receipt&&receipt.transactionHash&&!metaReceiptTracker[receipt.transactionHash]){
                                   metaReceiptTracker[receipt.transactionHash] = true
                                   this.setState({
-                                    amount:"",
+                                    ethToDaiAmount:"",
                                   })
                                 }
                               }).on('error', (err)=>{
@@ -1323,7 +1323,7 @@ export default class Exchange extends React.Component {
                           if(receipt&&receipt.transactionHash&&!metaReceiptTracker[receipt.transactionHash]){
                             metaReceiptTracker[receipt.transactionHash] = true
                             this.setState({
-                              amount:"",
+                              ethToDaiAmount:"",
                               loaderBarColor:"#4ab3f5",
                             })
                           }
@@ -1345,7 +1345,7 @@ export default class Exchange extends React.Component {
 
                   //send funds using metamask (or other injected web3 ... should be checked and on mainnet)
                   this.setState({
-                    amount:"",
+                    ethToDaiAmount:"",
                     loaderBarColor:"#42ceb2",
                     loaderBarStatusText:"Approving 🦄 exchange...",
                     loaderBarClick:()=>{
@@ -1361,7 +1361,7 @@ export default class Exchange extends React.Component {
                       if(receipt){
                         console.log("APPROVE COMPLETE?!?",receipt)
                         this.setState({
-                          amount:"",
+                          ethToDaiAmount:"",
                           ethBalanceAtStart:this.props.ethBalance,
                           ethBalanceShouldBe:eventualEthBalance,
                           loaderBarColor:"#4ab3f5",
@@ -1384,7 +1384,7 @@ export default class Exchange extends React.Component {
                     })
                 }else{
                   this.setState({
-                    amount:"",
+                    ethToDaiAmount:"",
                     ethBalanceAtStart:this.props.ethBalance,
                     ethBalanceShouldBe:eventualEthBalance,
                     loaderBarColor:"#4ab3f5",
