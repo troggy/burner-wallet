@@ -12,6 +12,7 @@ import {
 } from 'rimble-ui';
 import { PrimaryButton, BorderButton } from "./Buttons";
 import InputInfo from "./InputInfo";
+import { getStoredValue } from "../services/localStorage";
 
 export default class SendToAddress extends React.Component {
 
@@ -29,7 +30,8 @@ export default class SendToAddress extends React.Component {
           toAddress,
         },
         convertCurrency,
-        changeAlert
+        changeAlert,
+        address,
       } = props;
 
 
@@ -40,7 +42,7 @@ export default class SendToAddress extends React.Component {
       // NOTE: Two users could have different display currencies, which is why
       // at this point we'll have to adjust the requested amount for the user
       // sending money.
-      const displayCurrency = localStorage.getItem("currency");
+      const displayCurrency = getStoredValue("currency", address);
       if (!currency) {
           changeAlert({type: "warning", message: i18n.t("send_to_address.currency_error")});
           currencyWarning = false;
@@ -162,9 +164,9 @@ export default class SendToAddress extends React.Component {
 
   send = async () => {
     let { toAddress, amount } = this.state;
-    let { convertCurrency, currencyDisplay } = this.props
+    let { address, convertCurrency, currencyDisplay } = this.props
 
-    const displayCurrency = localStorage.getItem("currency");
+    const displayCurrency = getStoredValue("currency", address);
     amount = convertCurrency(amount, `USD/${displayCurrency}`);
     console.log("CONVERTED TO DOLLAR AMOUNT",amount)
 
@@ -325,7 +327,7 @@ export default class SendToAddress extends React.Component {
               <InputInfo color="blue">
                 {" "}
                 {`You've been requested to send ${new Intl.NumberFormat(
-                  localStorage.getItem("i18nextLng"),
+                  getStoredValue("i18nextLng"),
                   {
                     style: "currency",
                     currency: this.state.currency,

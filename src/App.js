@@ -44,6 +44,7 @@ import pdai from './assets/pdai.png';
 import base64url from 'base64url';
 import EthCrypto from 'eth-crypto';
 import styled from "styled-components";
+import { getStoredValue, storeValues, eraseStoredValue } from "./services/localStorage";
 
 let LOADERIMAGE = burnerlogo
 let HARDCODEVIEW// = "loader"// = "receipt"
@@ -103,8 +104,8 @@ export default class App extends Component {
 
     console.log("[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["+title+"]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]")
     let view = 'main'
-    let cachedView = localStorage.getItem("view")
-    let cachedViewSetAge = Date.now() - localStorage.getItem("viewSetTime")
+    let cachedView = getStoredValue("view")
+    let cachedViewSetAge = Date.now() - getStoredValue("viewSetTime")
     if(HARDCODEVIEW){
       view = HARDCODEVIEW
     }else if(cachedViewSetAge < 300000 && cachedView&&cachedView!==0){
@@ -161,8 +162,9 @@ export default class App extends Component {
   // NOTE: This function is for _displaying_ a currency value to a user. It
   // adds a currency unit to the beginning or end of the number!
   currencyDisplay(amount, toParts=false, convert=true) {
-    const locale = localStorage.getItem('i18nextLng') 
-    const symbol = localStorage.getItem('currency');
+    const { account } = this.state;
+    const locale = getStoredValue('i18nextLng');
+    const symbol = getStoredValue('currency', account) || CONFIG.CURRENCY.DEFAULT_CURRENCY;
 
     if (convert) {
       amount = this.convertCurrency(amount, `${symbol}/USD`);
@@ -322,10 +324,13 @@ export default class App extends Component {
         }
       }
     }
-    let nativeCurrency = localStorage.getItem('currency')
-    if (nativeCurrency === null) {
-      localStorage.setItem('currency', CONFIG.CURRENCY.DEFAULT_CURRENCY)
+    if (this.state.account){
+      let nativeCurrency = getStoredValue('currency', this.state.account)
+      if (nativeCurrency === null) {
+        storeValues({currency: CONFIG.CURRENCY.DEFAULT_CURRENCY}, this.state.account)
+      }
     }
+
     interval = setInterval(this.poll,1500)
     intervalLong = setInterval(this.longPoll,45000)
     // NOTE: We query once before starting the interval to define the value
@@ -439,9 +444,11 @@ export default class App extends Component {
           })
         }else{
           this.setState({possibleNewPrivateKey:false,newPrivateKey:this.state.possibleNewPrivateKey})
-          localStorage.setItem(this.state.account+"loadedBlocksTop","")
-          localStorage.setItem(this.state.account+"recentTxs","")
-          localStorage.setItem(this.state.account+"transactionsByAddress","")
+          storeValues({
+            loadedBlocksTop:"",
+            recentTxs:"",
+            transactionsByAddress:""
+          }, this.state.account);
           this.setState({recentTxs:[],transactionsByAddress:{},fullRecentTxs:[],fullTransactionsByAddress:{}})
         }
       }
@@ -452,13 +459,20 @@ export default class App extends Component {
 
   }
   componentDidUpdate(prevProps, prevState) {
-    let { network, web3 } = this.state;
+    let { network, web3, account } = this.state;
     if (web3 && network !== prevState.network /*&& !this.checkNetwork()*/) {
       console.log("WEB3 DETECTED BUT NOT RIGHT NETWORK",web3, network, prevState.network);
       //this.changeAlert({
       //  type: 'danger',
       //  message: 'Wrong Network. Please use Custom RPC endpoint: https://dai.poa.network or turn off MetaMask.'
       //}, false)
+    }
+    if (prevState.account !== account){
+      const currency = getStoredValue('currency');
+      if (currency){
+        storeValues({currency}, account);
+        eraseStoredValue('currency');
+      }
     }
   };
   checkNetwork() {
@@ -470,8 +484,10 @@ export default class App extends Component {
   }
   changeView = (view,cb) => {
     if(view==="exchange"||view==="main"/*||view.indexOf("account_")===0*/){
-      localStorage.setItem("view",view)//some pages should be sticky because of metamask reloads
-      localStorage.setItem("viewSetTime",Date.now())
+      storeValues({
+        viewSetTime: Date.now(),
+        view //some pages should be sticky because of metamask reloads
+      })
     }
     /*if (view.startsWith('send_with_link')||view.startsWith('send_to_address')) {
     console.log("This is a send...")
@@ -567,7 +583,7 @@ export default class App extends Component {
     let cachedEncrypted = this.state[key]
     if(!cachedEncrypted){
       //console.log("nothing found in memory, checking local storage")
-      cachedEncrypted = localStorage.getItem(key)
+      cachedEncrypted = getStoredValue(key)
     }
     if(cachedEncrypted){
       return cachedEncrypted
@@ -593,7 +609,7 @@ export default class App extends Component {
     if(this.state.recentTx) recentTxs = recentTxs.concat(this.state.recentTxs)
     let transactionsByAddress = Object.assign({},this.state.transactionsByAddress)
     if(!recentTxs||recentTxs.length<=0){
-      recentTxs = localStorage.getItem(this.state.account+"recentTxs")
+      recentTxs = getStoredValue("recentTxs", this.state.account)
       try{
         recentTxs=JSON.parse(recentTxs)
       }catch(e){
@@ -604,7 +620,7 @@ export default class App extends Component {
       recentTxs=[]
     }
     if(Object.keys(transactionsByAddress).length === 0){
-      transactionsByAddress = localStorage.getItem(this.state.account+"transactionsByAddress")
+      transactionsByAddress = getStoredValue("transactionsByAddress", this.state.account)
       try{
         transactionsByAddress=JSON.parse(transactionsByAddress)
       }catch(e){
@@ -674,8 +690,10 @@ export default class App extends Component {
       transactionsByAddress[t].sort(sortByBlockNumberDESC)
     }
     recentTxs = recentTxs.slice(0,12)
-    localStorage.setItem(this.state.account+"recentTxs",JSON.stringify(recentTxs))
-    localStorage.setItem(this.state.account+"transactionsByAddress",JSON.stringify(transactionsByAddress))
+    storeValues({
+      recentTxs: JSON.stringify(recentTxs),
+      transactionsByAddress: JSON.stringify(transactionsByAddress),
+    }, this.state.account);
     this.setState({recentTxs:recentTxs,transactionsByAddress:transactionsByAddress})
   }
   async addAllTransactionsFromList(recentTxs,transactionsByAddress,theList){
@@ -725,9 +743,9 @@ export default class App extends Component {
     }
   }
   render() {
-    const expertMode = localStorage.getItem("expertMode") === "true"
+    const expertMode = getStoredValue("expertMode") === "true"
       // Right now "expertMode" is enabled by default. To disable it by default, remove the following line.
-      || localStorage.getItem("expertMode") === null;
+      || getStoredValue("expertMode") === null;
 
     let {
       web3, account, gwei, block, avgBlockTime, etherscan, balance, metaAccount, burnMetaAccount, view, alert, send
@@ -1305,13 +1323,13 @@ export default class App extends Component {
                             if(RNMessageChannel){
                               RNMessageChannel.send("burn")
                             }
-                            if(localStorage&&typeof localStorage.setItem === "function"){
-                              localStorage.setItem(this.state.account+"loadedBlocksTop","")
-                              localStorage.setItem(this.state.account+"metaPrivateKey","")
-                              localStorage.setItem(this.state.account+"recentTxs","")
-                              localStorage.setItem(this.state.account+"transactionsByAddress","")
-                              this.setState({recentTxs:[],transactionsByAddress:{}})
-                            }
+                            storeValues({
+                              loadedBlocksTop: "",
+                              metaPrivateKey: "",
+                              recentTxs: "",
+                              transactionsByAddress: "",
+                            }, this.state.account);
+                            this.setState({recentTxs:[],transactionsByAddress:{}})
                           }}
                           />
                         </Card>
@@ -1434,59 +1452,48 @@ export default class App extends Component {
                       this.setState({parsingTheChain:true},async ()=>{
                         let upperBoundOfSearch = this.state.block
                         //parse through recent transactions and store in local storage
-
-                        if(localStorage&&typeof localStorage.setItem === "function"){
-
-                          let initResult = this.initRecentTxs()
-                          let recentTxs = initResult[0]
-                          let transactionsByAddress = initResult[1]
-
-                          let loadedBlocksTop = this.state.loadedBlocksTop
-                          if(!loadedBlocksTop){
-                            loadedBlocksTop = localStorage.getItem(this.state.account+"loadedBlocksTop")
-                          }
-                          //  Look back through previous blocks since this account
-                          //  was last online... this could be bad. We might need a
-                          //  central server keeping track of all these and delivering
-                          //  a list of recent transactions
-
-                          let updatedTxs = false
-                          if(!loadedBlocksTop || loadedBlocksTop<this.state.block){
-                            if(!loadedBlocksTop) loadedBlocksTop = Math.max(2,this.state.block-5)
-
-                            if(this.state.block - loadedBlocksTop > MAX_BLOCK_TO_LOOK_BACK){
-                              loadedBlocksTop = this.state.block-MAX_BLOCK_TO_LOOK_BACK
-                            }
-
-                            let paddedLoadedBlocks = parseInt(loadedBlocksTop)+BLOCKS_TO_PARSE_PER_BLOCKTIME
-                            //console.log("choosing the min of ",paddedLoadedBlocks,"and",this.state.block)
-                            let parseBlock=Math.min(paddedLoadedBlocks,this.state.block)
-
-                            //console.log("MIN:",parseBlock)
-                            upperBoundOfSearch = parseBlock
-                            console.log(" +++++++======== Parsing recent blocks ~"+this.state.block)
-                            //first, if we are still back parsing, we need to look at *this* block too
-                            if(upperBoundOfSearch<this.state.block){
-                              for(let b=this.state.block;b>this.state.block-6;b--){
-                                //console.log(" ++ Parsing *CURRENT BLOCK* Block "+b+" for transactions...")
-                                updatedTxs = (await this.parseBlocks(b,recentTxs,transactionsByAddress)) || updatedTxs
-                              }
-                            }
-                            console.log(" +++++++======== Parsing from "+loadedBlocksTop+" to "+upperBoundOfSearch+"....")
-                            while(loadedBlocksTop<parseBlock){
-                              //console.log(" ++ Parsing Block "+parseBlock+" for transactions...")
-                              updatedTxs = (await this.parseBlocks(parseBlock,recentTxs,transactionsByAddress)) || updatedTxs
-                              parseBlock--
-                            }
-                          }
-
-                          if(updatedTxs||!this.state.recentTxs){
-                            this.sortAndSaveTransactions(recentTxs,transactionsByAddress)
-                          }
-
-                          localStorage.setItem(this.state.account+"loadedBlocksTop",upperBoundOfSearch)
-                          this.setState({parsingTheChain:false,loadedBlocksTop:upperBoundOfSearch})
+                        let initResult = this.initRecentTxs()
+                        let recentTxs = initResult[0]
+                        let transactionsByAddress = initResult[1]
+                        let loadedBlocksTop = this.state.loadedBlocksTop
+                        if (!loadedBlocksTop) {
+                          loadedBlocksTop = getStoredValue("loadedBlocksTop", this.state.account)
                         }
+                        //  Look back through previous blocks since this account
+                        //  was last online... this could be bad. We might need a
+                        //  central server keeping track of all these and delivering
+                        //  a list of recent transactions
+                        let updatedTxs = false
+                        if (!loadedBlocksTop || loadedBlocksTop < this.state.block) {
+                          if (!loadedBlocksTop) loadedBlocksTop = Math.max(2, this.state.block - 5)
+                          if (this.state.block - loadedBlocksTop > MAX_BLOCK_TO_LOOK_BACK) {
+                            loadedBlocksTop = this.state.block - MAX_BLOCK_TO_LOOK_BACK
+                          }
+                          let paddedLoadedBlocks = parseInt(loadedBlocksTop) + BLOCKS_TO_PARSE_PER_BLOCKTIME
+                          //console.log("choosing the min of ",paddedLoadedBlocks,"and",this.state.block)
+                          let parseBlock = Math.min(paddedLoadedBlocks, this.state.block)
+                          //console.log("MIN:",parseBlock)
+                          upperBoundOfSearch = parseBlock
+                          console.log(" +++++++======== Parsing recent blocks ~" + this.state.block)
+                          //first, if we are still back parsing, we need to look at *this* block too
+                          if (upperBoundOfSearch < this.state.block) {
+                            for (let b = this.state.block; b > this.state.block - 6; b--) {
+                              //console.log(" ++ Parsing *CURRENT BLOCK* Block "+b+" for transactions...")
+                              updatedTxs = (await this.parseBlocks(b, recentTxs, transactionsByAddress)) || updatedTxs
+                            }
+                          }
+                          console.log(" +++++++======== Parsing from " + loadedBlocksTop + " to " + upperBoundOfSearch + "....")
+                          while (loadedBlocksTop < parseBlock) {
+                            //console.log(" ++ Parsing Block "+parseBlock+" for transactions...")
+                            updatedTxs = (await this.parseBlocks(parseBlock, recentTxs, transactionsByAddress)) || updatedTxs
+                            parseBlock--
+                          }
+                        }
+                        if (updatedTxs || !this.state.recentTxs) {
+                          this.sortAndSaveTransactions(recentTxs, transactionsByAddress)
+                        }
+                        storeValues({loadedBlocksTop: upperBoundOfSearch}, this.state.account);
+                        this.setState({parsingTheChain: false, loadedBlocksTop: upperBoundOfSearch})
                         //console.log("~~ DONE PARSING SET ~~")
                       })
                     }

@@ -9,6 +9,7 @@ import { isValid } from "iban";
 import { placeOrder, getOrder, getEstimate } from "../services/bity";
 import { price } from "../services/ethgasstation";
 import InputInfo from "./InputInfo";
+import { getStoredValue, storeValues } from "../services/localStorage";
 
 const P = styled.p`
   color: ${props => (props.color ? props.color : "grey")};
@@ -60,7 +61,7 @@ class Bity extends Component {
   constructor(props) {
     super(props);
 
-    const pk = localStorage.getItem("metaPrivateKey");
+    const pk = getStoredValue("metaPrivateKey");
     let metaAccount;
     if (pk && pk !== "0") {
       metaAccount = props.mainnetweb3.eth.accounts.privateKeyToAccount(pk);
@@ -186,8 +187,7 @@ class Bity extends Component {
         });
       }
 
-      const storageName = `${address}recentTxs`;
-      const recentTxs = JSON.parse(localStorage.getItem(storageName));
+      const recentTxs = JSON.parse(getStoredValue("recentTxs", address));
       recentTxs.push({
         blockNumber: receipt.blockNumber,
         from: address,
@@ -197,7 +197,7 @@ class Bity extends Component {
         orderId
       });
 
-      localStorage.setItem(storageName, JSON.stringify(recentTxs));
+      storeValues({recentTxs: JSON.stringify(recentTxs)}, address);
 
       const receiptObj = {
         to: "bity.com",
@@ -280,6 +280,7 @@ class Bity extends Component {
   }
 
   validate(input) {
+    const { address } = this.props;
     return () => {
       const { fields } = this.state;
       let newFields;
@@ -321,7 +322,7 @@ class Bity extends Component {
           convertCurrency
         } = this.props;
 
-        const displayCurrency = localStorage.getItem("currency");
+        const displayCurrency = getStoredValue("currency", address);
         const amount = convertCurrency(
           parseFloat(this.refs.amount.value),
           `USD/${displayCurrency}`
