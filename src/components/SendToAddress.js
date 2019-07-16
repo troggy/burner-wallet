@@ -24,6 +24,7 @@ export default class SendToAddress extends React.Component {
     if (props.scannerState) {
       const {
         scannerState: {
+          message,
           extraMessage,
           toAddress,
         },
@@ -32,7 +33,7 @@ export default class SendToAddress extends React.Component {
       } = props;
 
 
-      let { scannerState: { amount, currency, message } } = props;
+      let { scannerState: { amount, currency } } = props;
       let currencyWarning = false;
       let requestedAmount = 0;
 
@@ -55,7 +56,6 @@ export default class SendToAddress extends React.Component {
                   .toFixed(2);
         currencyWarning = true;
       }
-      message = decodeURI(message);
 
       initialState = {
         amount,
@@ -104,12 +104,9 @@ export default class SendToAddress extends React.Component {
 
   componentWillReceiveProps(newProps) {
     if (this.props.scannerState !== newProps.scannerState) {
-        const { message,...rest } = newProps.scannerState;
-
-        this.setState({
+       this.setState({
           ...this.state,
-          ...rest,
-          message: decodeURI(message)
+          ...newProps.scannerState
         })
     }
   }
