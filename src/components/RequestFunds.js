@@ -64,7 +64,7 @@ export default class RequestFunds extends React.Component {
       message = encodeURI(message).replaceAll("#","%23").replaceAll(";","%3B").replaceAll(":","%3A").replaceAll("/","%2F");
       const currency = getStoredValue("currency", address);
 
-      const qrValue = `${url}/${address};${amount};${message};${currency}`;
+      const qrValue = `${url}/${address};${amount};${encodedMessage};${currency}`;
 
       return (
         <div>

@@ -111,7 +111,7 @@ class SendByScan extends Component {
             amount: parseFloat(dataSplit[1], 10)
           }
           if (dataSplit.length > 1) {
-            returnState.message = dataSplit[2]
+            returnState.message = decodeURI(dataSplit[2])
           }
           if (dataSplit.length > 2) {
             returnState.currency = dataSplit[3]
