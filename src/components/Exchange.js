@@ -824,7 +824,7 @@ export default class Exchange extends React.Component {
                   }
                 })
 
-                const displayCurrency = localStorage.getItem("currency");
+                const displayCurrency = getStoredValue("currency", address);
                 let amount = convertCurrency(daiToXdaiAmount, `USD/${displayCurrency}`);
                 // TODO: depositDai doesn't use the destination parameter anymore
                 // Remove it.
@@ -879,7 +879,7 @@ export default class Exchange extends React.Component {
                 let { daiToXdaiAmount } = this.state;
 
                 // First we convert from the current display value and
-                const displayCurrency = localStorage.getItem("currency");
+                const displayCurrency = getStoredValue("currency", address);
                 let amount = convertCurrency(daiToXdaiAmount, `USD/${displayCurrency}`);
 
                 // Then we convert that value to wei
@@ -1065,7 +1065,7 @@ export default class Exchange extends React.Component {
               }
 
               // TODO: Error: Returned values aren't valid, did it run Out of Gas?
-              const displayCurrency = localStorage.getItem("currency");
+              const displayCurrency = getStoredValue("currency", address);
               let amount = convertCurrency(ethToDaiAmount, `USD/${displayCurrency}`);
 
               console.log("AMOUNT:", amount, "DAI BALANCE:", this.props.daiBalance)
@@ -1172,7 +1172,7 @@ export default class Exchange extends React.Component {
                 webToUse = this.state.mainnetweb3
               }
 
-              const displayCurrency = localStorage.getItem("currency");
+              const displayCurrency = getStoredValue("currency", address);
               let amount = convertCurrency(ethToDaiAmount, `USD/${displayCurrency}`);
 
               console.log("AMOUNT:", amount, "ETH BALANCE:", this.props.ethBalance)
