@@ -31,7 +31,7 @@ import BurnWallet from './components/BurnWallet'
 import Bottom from './components/Bottom';
 import Card from './components/StyledCard';
 import incogDetect from './services/incogDetect.js'
-import { ThemeProvider, Text } from 'rimble-ui';
+import { ThemeProvider } from 'rimble-ui';
 import theme from "./theme";
 import getConfig from "./config";
 //https://github.com/lesnitsky/react-native-webview-messaging/blob/v1/examples/react-native/web/index.js
@@ -41,7 +41,6 @@ import dai from './assets/dai.png';
 import pdai from './assets/pdai.png';
 import base64url from 'base64url';
 import EthCrypto from 'eth-crypto';
-import styled from "styled-components";
 import { getStoredValue, storeValues, eraseStoredValue } from "./services/localStorage";
 
 let LOADERIMAGE = burnerlogo
@@ -89,12 +88,6 @@ const MAX_BLOCK_TO_LOOK_BACK = 512//don't look back more than 512 blocks
 
 let interval
 let intervalLong
-
-const Warning = styled(Text).attrs(()=>({
-  fontSize: 2,
-  color: "#F4511E",
-  textAlign: 'center'
-}))``;
 
 export default class App extends Component {
   constructor(props) {
@@ -988,9 +981,6 @@ export default class App extends Component {
                             otherAmounts={{DAI: this.state.daiBalance, ETH: parseFloat(this.state.ethBalance) * parseFloat(this.state.ethprice)}}
                             currencyDisplay={this.currencyDisplay} />
                         )}
-
-                        {/* eslint-disable-next-line jsx-a11y/accessible-emoji */}
-                        <Warning>💀 This product is currently in early alpha. Use at your own risk! 💀</Warning>
 
                         <MainCard
                           buttonStyle={buttonStyle}
