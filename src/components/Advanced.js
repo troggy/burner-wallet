@@ -161,15 +161,23 @@ export default class Advanced extends React.Component {
 
     return (
       <div style={{marginTop:20}}>
-        <Flex py={3} alignItems='center' justifyContent='space-between'>
-          <Text>{i18n.t('currency.label')}</Text>
-          <Select items={CURRENCY.CURRENCY_LIST} onChange={this.updateCurrency} value={currency}/>
-        </Flex>
-        <Flex py={3} alignItems='center' justifyContent='space-between'>
-          <Text>Enable advanced features</Text>
-          <Checkbox onChange={this.updateAdvancedBalance} checked={expertMode} />
-        </Flex>
-        <hr style={{paddingTop:20}}/>
+        {/* NOTE: We don't need this functionality in Planet A. If we wanted to
+            properly remove it, that would mean "cleaning" this component from
+            any unused variables. Instead however, we're just setting these
+            options to display: none to guarantee that they don't break
+            any functionality.
+        */}
+        <div style={{display: "none"}}>
+          <Flex py={3} alignItems='center' justifyContent='space-between'>
+            <Text>{i18n.t('currency.label')}</Text>
+            <Select items={CURRENCY.CURRENCY_LIST} onChange={this.updateCurrency} value={currency}/>
+          </Flex>
+          <Flex py={3} alignItems='center' justifyContent='space-between'>
+            <Text>Enable advanced features</Text>
+            <Checkbox onChange={this.updateAdvancedBalance} checked={expertMode} />
+          </Flex>
+          <hr style={{paddingTop:20}}/>
+        </div>
         <div>
           <div style={{width:"100%",textAlign:"center"}}><h5>Learn More</h5></div>
           <div className="content ops row settings-row" style={{marginBottom:10}}>
