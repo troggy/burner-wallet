@@ -181,14 +181,17 @@ export default class Advanced extends React.Component {
         <div>
           <div style={{width:"100%",textAlign:"center"}}><h5>Learn More</h5></div>
           <div className="content ops row settings-row" style={{marginBottom:10}}>
-            <a href="https://github.com/leapdao/burner-wallet" style={{color:"#FFFFFF"}} target="_blank" rel="noopener noreferrer">
+            <a href="https://github.com/social-dist0rtion-protocol/planet-a" style={{color:"#FFFFFF"}} target="_blank" rel="noopener noreferrer">
               <BorderButton width={1}>
                 <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
                   <i className="fas fa-code"/> {i18n.t('code')}
                 </Scaler>
               </BorderButton>
             </a>
-            <a href="https://leapdao.org/" style={{color:"#FFFFFF"}} target="_blank" rel="noopener noreferrer">
+            {/* NOTE: Added presentation of Planet A as "About" for now.
+                Once we have a better resource, we should replace this
+              */}
+            <a href="https://docs.google.com/presentation/d/1zjhVQMqVYKIzXUOKR83o5jbo97BRb60XqG6_OwnJOlw/edit" style={{color:"#FFFFFF"}} target="_blank" rel="noopener noreferrer">
               <BorderButton width={1}>
                 <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
                   <i className="fas fa-info"/> {i18n.t('about')}
