@@ -23,7 +23,6 @@ import Receipt from "./components/Receipt";
 import MainCard from './components/MainCard';
 import History from './components/History';
 import Advanced from './components/Advanced';
-import MoreButtons from './components/MoreButtons';
 import RecentTransactions from './components/RecentTransactions';
 import Footer from './components/Footer';
 import Loader from './components/Loader';
@@ -847,15 +846,6 @@ export default class App extends Component {
               {web3 /*&& this.checkNetwork()*/ && (() => {
                 //console.log("VIEW:",view)
 
-                let moreButtons = (
-                  <MoreButtons
-                    buttonStyle={buttonStyle}
-                    changeView={this.changeView}
-                    isVendor={this.state.isVendor&&this.state.isVendor.isAllowed}
-                    expertMode={expertMode}
-                  />
-                )
-
                 let extraTokens = ""
 
                 let defaultBalanceDisplay = (
@@ -1011,8 +1001,6 @@ export default class App extends Component {
                           changeView={this.changeView}
                           currencyDisplay={this.currencyDisplay}
                         />
-
-                        {moreButtons}
 
                         <RecentTransactions
                           currencyDisplay={this.currencyDisplay}
