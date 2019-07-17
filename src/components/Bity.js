@@ -8,15 +8,11 @@ import styled from "styled-components";
 import { isValid } from "iban";
 import { placeOrder, getOrder, getEstimate } from "../services/bity";
 import { price } from "../services/ethgasstation";
+import InputInfo from "./InputInfo";
+import { getStoredValue, storeValues } from "../services/localStorage";
 
 const P = styled.p`
-  color: gray;
-`;
-
-const Error = styled.span`
-  padding: 6px 0 0 0;
-  color: red;
-  font-size: 0.7em;
+  color: ${props => (props.color ? props.color : "grey")};
 `;
 
 // See: https://doc.bity.com/exchange/v2.html#place-an-order
@@ -65,7 +61,7 @@ class Bity extends Component {
   constructor(props) {
     super(props);
 
-    const pk = localStorage.getItem("metaPrivateKey");
+    const pk = getStoredValue("metaPrivateKey");
     let metaAccount;
     if (pk && pk !== "0") {
       metaAccount = props.mainnetweb3.eth.accounts.privateKeyToAccount(pk);
@@ -114,8 +110,10 @@ class Bity extends Component {
 
   async cashout() {
     const { IBAN } = this.validate("IBAN")();
-    const { metaAccount } = this.state;
-    const { name, amount } = this.state.fields;
+    const {
+      metaAccount,
+      fields: { name }
+    } = this.state;
     const {
       address,
       ethPrice,
@@ -125,10 +123,15 @@ class Bity extends Component {
       setReceipt,
       changeAlert
     } = this.props;
+    let { amount } = this.state.fields;
+
     if (IBAN.valid) {
       changeView("loader_ROOTCHAIN");
 
       let order;
+
+      // NOTE: We've converted amount while the user was typing already to USD.
+      // Hence, there's not need to do anything here!
       const amountInEth = (amount.value / ethPrice).toString();
       try {
         order = await placeOrder(
@@ -184,8 +187,7 @@ class Bity extends Component {
         });
       }
 
-      const storageName = `${address}recentTxs`;
-      const recentTxs = JSON.parse(localStorage.getItem(storageName));
+      const recentTxs = JSON.parse(getStoredValue("recentTxs", address));
       recentTxs.push({
         blockNumber: receipt.blockNumber,
         from: address,
@@ -195,7 +197,7 @@ class Bity extends Component {
         orderId
       });
 
-      localStorage.setItem(storageName, JSON.stringify(recentTxs));
+      storeValues({recentTxs: JSON.stringify(recentTxs)}, address);
 
       const receiptObj = {
         to: "bity.com",
@@ -278,6 +280,7 @@ class Bity extends Component {
   }
 
   validate(input) {
+    const { address } = this.props;
     return () => {
       const { fields } = this.state;
       let newFields;
@@ -312,17 +315,28 @@ class Bity extends Component {
           }
         });
       } else if (input === "amount") {
-        const amount = parseFloat(this.refs.amount.value);
-        const { ethPrice, ethBalance } = this.props;
+        const {
+          ethPrice,
+          ethBalance,
+          currencyDisplay,
+          convertCurrency
+        } = this.props;
+
+        const displayCurrency = getStoredValue("currency", address);
+        const amount = convertCurrency(
+          parseFloat(this.refs.amount.value),
+          `USD/${displayCurrency}`
+        );
+
         const min = MIN_AMOUNT_DOLLARS;
         const max = parseFloat(ethPrice) * parseFloat(ethBalance);
 
         let valid, message;
         if (amount < min) {
           valid = false;
-          message = `${i18n.t(
-            "offramp.amount_too_small"
-          )} $${MIN_AMOUNT_DOLLARS}.`;
+          message = `${i18n.t("offramp.amount_too_small")} ${currencyDisplay(
+            MIN_AMOUNT_DOLLARS
+          )}.`;
         } else if (amount > max) {
           valid = false;
           message = i18n.t("offramp.amount_too_big");
@@ -345,6 +359,8 @@ class Bity extends Component {
 
   render() {
     const { fields } = this.state;
+    const { currencyDisplay } = this.props;
+
     return (
       <div>
         <Box mb={4}>
@@ -373,7 +389,9 @@ class Bity extends Component {
                 fields.name.valid === null || fields.name.valid ? "grey" : "red"
               }
             />
-            {fields.name.message ? <Error>{fields.name.message}</Error> : null}
+            {fields.name.message ? (
+              <InputInfo color="red">{fields.name.message}</InputInfo>
+            ) : null}
           </Field>
           <Field mb={3} label="IBAN">
             <Input
@@ -387,7 +405,9 @@ class Bity extends Component {
                 fields.IBAN.valid === null || fields.IBAN.valid ? "grey" : "red"
               }
             />
-            {fields.IBAN.message ? <Error>{fields.IBAN.message}</Error> : null}
+            {fields.IBAN.message ? (
+              <InputInfo color="red">{fields.IBAN.message}</InputInfo>
+            ) : null}
           </Field>
           <Field mb={3} label={i18n.t("offramp.form.amount")}>
             <Input
@@ -400,13 +420,20 @@ class Bity extends Component {
                   ? "grey"
                   : "red"
               }
-              placeholder="$0.00"
+              placeholder={currencyDisplay(0)}
             />
             {fields.amount.message ? (
-              <Error>{fields.amount.message}</Error>
+              <InputInfo color="red">{fields.amount.message}</InputInfo>
             ) : null}
           </Field>
         </Box>
+        <P color="red">
+          You're using an early alpha product! The following loading dialogue is
+          unfortunately really fragile and needs to remain uninterrupted for the
+          whole process. So, please don't close it abruptly. If you need help,
+          please reach out to someone at leapdao.org. We're working on a much
+          better and more reliable cashout dialogue!
+        </P>
         <PrimaryButton
           size={"large"}
           width={1}

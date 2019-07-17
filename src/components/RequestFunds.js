@@ -10,6 +10,7 @@ import {
   QR as QRCode
 } from 'rimble-ui'
 import { PrimaryButton } from "./Buttons";
+import { getStoredValue } from "../services/localStorage";
 
 export default class RequestFunds extends React.Component {
 
@@ -30,23 +31,40 @@ export default class RequestFunds extends React.Component {
   };
 
   request = () => {
-    if(this.state.canRequest){
-      this.setState({requested:true})
+    const { changeAlert } = this.props;
+    const { amount, canRequest } = this.state;
+
+    if(canRequest){
+      this.setState({
+        requested: true,
+        amount
+      })
     }else{
-      this.props.changeAlert({type: 'warning', message: 'Please enter a valid amount'})
+      changeAlert({type: 'warning', message: 'Please enter a valid amount'})
     }
   };
 
   render() {
     let { canRequest, message, amount, requested } = this.state;
-    let {currencyDisplay,view,buttonStyle,ERC20TOKEN,address, changeView} = this.props
+    let {
+      currencyDisplay,
+      view,
+      buttonStyle,
+      address,
+      changeView,
+    } = this.props
     if(requested){
 
       let url = window.location.protocol+"//"+window.location.hostname
       if(window.location.port&&window.location.port!==80&&window.location.port!==443){
         url = url+":"+window.location.port
       }
-      let qrValue = url+"/"+this.props.address+";"+amount+";"+encodeURI(message).replaceAll("#","%23").replaceAll(";","%3B").replaceAll(":","%3A").replaceAll("/","%2F")
+
+      // TODO: Understand why these `replaceAll`s are used here.
+      const encodedMessage = encodeURI(message).replaceAll("#","%23").replaceAll(";","%3B").replaceAll(":","%3A").replaceAll("/","%2F");
+      const currency = getStoredValue("currency", address);
+
+      const qrValue = `${url}/${address};${amount};${encodedMessage};${currency}`;
 
       return (
         <div>
@@ -55,7 +73,10 @@ export default class RequestFunds extends React.Component {
           }}>
           <div style={{width:"100%",textAlign:'center'}}>
             <div style={{fontSize:30,cursor:"pointer",textAlign:"center",width:"100%"}}>
-              {currencyDisplay(amount)}
+              {/* NOTE: We don't need to convert here, as the user already put
+                * in the amount in their local currency.
+                */}
+              {currencyDisplay(amount, false, false)}
             </div>
 
             <div style={{cursor:"pointer",textAlign:"center",width:"100%"}}>
@@ -70,13 +91,6 @@ export default class RequestFunds extends React.Component {
               <Input type='url' readOnly value={qrValue} width={1} />
             </Box>
 
-            {/* <div className="input-group">
-              <input type="text" className="form-control" value={qrValue} disabled/>
-              <div className="input-group-append">
-                <span className="input-group-text"><i className="fas fa-copy"/></span>
-              </div>
-            </div> */}
-
             </div>
           </CopyToClipboard>
           <RecentTransactions
@@ -84,12 +98,11 @@ export default class RequestFunds extends React.Component {
             view={view}
             max={5}
             buttonStyle={buttonStyle}
-            ERC20TOKEN={ERC20TOKEN}
-            transactionsByAddress={ERC20TOKEN?this.props.fullTransactionsByAddress:this.props.transactionsByAddress}
+            transactionsByAddress={this.props.transactionsByAddress}
             changeView={changeView}
             address={address}
             block={this.props.block}
-            recentTxs={ERC20TOKEN?this.props.fullRecentTxs:this.props.recentTxs}
+            recentTxs={this.props.recentTxs}
           />
         </div>
       )
@@ -100,7 +113,7 @@ export default class RequestFunds extends React.Component {
             <Input
               type="number"
               width={1}
-              placeholder="$0.00"
+              placeholder={this.props.currencyDisplay(0)}
               value={this.state.amount}
               onChange={event => this.updateState('amount', event.target.value)}
             />

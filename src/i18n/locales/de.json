@@ -54,7 +54,8 @@
       "to_address": "An Adresse",
       "send_amount": "Betrag senden",
       "notice": "Du kannst nur folgenden Betrag senden: ",
-      "error": "Bitte eine gültige Adresse oder ENS eingeben."
+      "error": "Bitte eine gültige Adresse oder ENS eingeben.",
+      "currency_error": "Bitte aktualisiere deine burner-wallet zu einer neuen Version die Währungsumrechnung unterstützt."
     },
     "send_by_scan": {
       "try_again": "Bitte versuchen Sie es erneut",
@@ -81,7 +82,9 @@
       "invalid_to_amount": "Bitte einen gültige Betrag eingeben",
       "calculate_gas_price": "Berechne den besten Gas-Preis...",
       "go_to_etherscan": "Auf Etherscan gehen?",
-      "idk": "ich weiß nicht wie es hier weitergeht? vielleicht irgendetwas was die bridge erklärt?"
+      "idk": "ich weiß nicht wie es hier weitergeht? vielleicht irgendetwas was die bridge erklärt?",
+      "fast_exit_swap": "Dieser Währungswechsel wird in zwei Transaktionen stattfinden.",
+      "fast_exit_patience": "Wechsel erfolgreich eingeleitet. Du wirst deinen DAI umgehend erhalten."
     },
     "request_funds": {
       "item_message": "Gegenstand oder Nachricht",

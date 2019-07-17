@@ -8,9 +8,11 @@ import {
   Text,
   Select,
   Flex,
+  Checkbox
 } from 'rimble-ui'
 import { PrimaryButton, BorderButton } from '../components/Buttons'
 import getConfig from '../config'
+import { getStoredValue, storeValues } from "../services/localStorage";
 
 const { CURRENCY } = getConfig()
 
@@ -21,24 +23,37 @@ export default class Advanced extends React.Component {
       privateKeyQr:false,
       seedPhraseHidden:true,
       privateKeyHidden:true,
-      currency: ''
+      currency: '',
+      expertMode:false
     }
+    this.updateCurrency = this.updateCurrency.bind(this)
   }
 
   componentDidMount() {
-    let currency = localStorage.getItem('currency')
-    this.setState({ currency })
+    const { address } = this.props;
+    const currency = getStoredValue('currency', address) || CURRENCY.DEFAULT_CURRENCY;
+    const expertMode = getStoredValue("expertMode") === "true"
+      // Right now "expertMode" is enabled by default. To disable it by default, remove the following line.
+      || getStoredValue("expertMode") === null;
+    this.setState({ currency, expertMode })
   }
 
   updateCurrency = e => {
+    const { address } = this.props;
     let { value } = e.target
     this.setState({ currency: value })
-    localStorage.setItem('currency', value)
+    storeValues({ currency: value }, address)
+  }
+
+  updateAdvancedBalance= e => {
+    let { checked } = e.target
+    this.setState({ expertMode: checked })
+    storeValues({ expertMode: checked })
   }
 
   render(){
     let {isVendor, balance, privateKey, changeAlert, changeView, setPossibleNewPrivateKey} = this.props
-    let { currency } = this.state
+    let { currency, expertMode } = this.state
 
     let url = window.location.protocol+"//"+window.location.hostname
     if(window.location.port&&window.location.port!==80&&window.location.port!==443){
@@ -146,34 +161,36 @@ export default class Advanced extends React.Component {
 
     return (
       <div style={{marginTop:20}}>
-      <Flex alignItems='center' justifyContent='space-between' width={1}>
-        <Text>{i18n.t('currency.label')}</Text>
-        <Select items={CURRENCY.CURRENCY_LIST} onChange={this.updateCurrency} value={currency}/>
-      </Flex>
-      <hr style={{paddingTop:20}}/>
-      <div>
-        <div style={{width:"100%",textAlign:"center"}}><h5>Learn More</h5></div>
-        <div className="content ops row settings-row" style={{marginBottom:10}}>
-          <a href="https://github.com/leapdao/burner-wallet" style={{color:"#FFFFFF"}} target="_blank" rel="noopener noreferrer">
-            <BorderButton width={1}>
-              <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
-                <i className="fas fa-code"/> {i18n.t('code')}
-              </Scaler>
-            </BorderButton>
-          </a>
-          <a href="https://leapdao.org/" style={{color:"#FFFFFF"}} target="_blank" rel="noopener noreferrer">
-            <BorderButton width={1}>
-              <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
-                <i className="fas fa-info"/> {i18n.t('about')}
-              </Scaler>
-            </BorderButton>
-          </a>
+        <Flex py={3} alignItems='center' justifyContent='space-between'>
+          <Text>{i18n.t('currency.label')}</Text>
+          <Select items={CURRENCY.CURRENCY_LIST} onChange={this.updateCurrency} value={currency}/>
+        </Flex>
+        <Flex py={3} alignItems='center' justifyContent='space-between'>
+          <Text>Enable advanced features</Text>
+          <Checkbox onChange={this.updateAdvancedBalance} checked={expertMode} />
+        </Flex>
+        <hr style={{paddingTop:20}}/>
+        <div>
+          <div style={{width:"100%",textAlign:"center"}}><h5>Learn More</h5></div>
+          <div className="content ops row settings-row" style={{marginBottom:10}}>
+            <a href="https://github.com/leapdao/burner-wallet" style={{color:"#FFFFFF"}} target="_blank" rel="noopener noreferrer">
+              <BorderButton width={1}>
+                <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
+                  <i className="fas fa-code"/> {i18n.t('code')}
+                </Scaler>
+              </BorderButton>
+            </a>
+            <a href="https://leapdao.org/" style={{color:"#FFFFFF"}} target="_blank" rel="noopener noreferrer">
+              <BorderButton width={1}>
+                <Scaler config={{startZoomAt:400,origin:"50% 50%"}}>
+                  <i className="fas fa-info"/> {i18n.t('about')}
+                </Scaler>
+              </BorderButton>
+            </a>
+          </div>
         </div>
-      </div>
 
-      <hr style={{paddingTop:20}}/>
-
-
+        <hr style={{paddingTop:20}}/>
 
         {privateKey && !isVendor &&
         <div>

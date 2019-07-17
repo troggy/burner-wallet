@@ -11,6 +11,8 @@ import {
   Input,
 } from 'rimble-ui';
 import { PrimaryButton, BorderButton } from "./Buttons";
+import InputInfo from "./InputInfo";
+import { getStoredValue } from "../services/localStorage";
 
 export default class SendToAddress extends React.Component {
 
@@ -21,12 +23,58 @@ export default class SendToAddress extends React.Component {
 
     let initialState;
     if (props.scannerState) {
-      const { amount, message, extraMessage, toAddress } = props.scannerState
+      const {
+        scannerState: {
+          message,
+          extraMessage,
+          toAddress,
+        },
+        convertCurrency,
+        changeAlert,
+        address,
+      } = props;
+
+
+      let { scannerState: { amount, currency } } = props;
+      let currencyWarning = false;
+      let requestedAmount = "";
+
+      // NOTE: Two users could have different display currencies, which is why
+      // at this point we'll have to adjust the requested amount for the user
+      // sending money.
+      const displayCurrency = getStoredValue("currency", address);
+
+      // NOTE: In this case, we simply scan the "Receive" QR code
+      if (toAddress && !currency && !amount && !message) {
+        // NOTE: We're setting currency equal to displayCurrency here to not
+        // trigger the next condition, as that would set currencyWarning to
+        // true again.
+        currency = displayCurrency;
+
+      // NOTE: In this case, we scan the RequestFunds QR code and if "currency"
+      // is missing, we display a warning.
+      } else if (((toAddress && amount) || message) && !currency) {
+        changeAlert({type: "warning", message: i18n.t("send_to_address.currency_error")});
+        // NOTE: We're setting currency equal to displayCurrency here to not
+        // trigger the next condition, as that would set currencyWarning to
+        // true again.
+        currency = displayCurrency;
+      } else if (currency !== displayCurrency) {
+        requestedAmount = amount;
+        amount = convertCurrency(amount, `${displayCurrency}/${currency}`)
+                  .toFixed(2);
+        currencyWarning = true;
+      }
+
       initialState = {
         amount,
+        requestedAmount,
         message,
         extraMessage,
-        toAddress
+        toAddress,
+        currency,
+        currencyWarning,
+        displayCurrency
       }
     } else {
       const { amount, message, extraMessage } = props
@@ -37,6 +85,7 @@ export default class SendToAddress extends React.Component {
         toAddress: ""
       }
     }
+
 
     initialState.fromEns = ""
     initialState.canSend = false
@@ -64,7 +113,10 @@ export default class SendToAddress extends React.Component {
 
   componentWillReceiveProps(newProps) {
     if (this.props.scannerState !== newProps.scannerState) {
-        this.setState(Object.assign(this.state, newProps.scannerState))
+       this.setState({
+          ...this.state,
+          ...newProps.scannerState
+        })
     }
   }
 
@@ -90,18 +142,7 @@ export default class SendToAddress extends React.Component {
   }
   componentDidMount(){
     this.setState({ canSend: this.canSend() })
-    setTimeout(()=>{
-      if(!this.state.toAddress && this.addressInput){
-        this.addressInput.focus();
-      }else if(!this.state.amount && this.amountInput){
-        this.amountInput.focus();
-      }else if(this.messageInput){
-        this.messageInput.focus();
-        setTimeout(()=>{
-          this.scrollToBottom()
-        },30)
-      }
-    },350)
+    this.bounceToAmountIfReady();
   }
 
   canSend() {
@@ -119,9 +160,10 @@ export default class SendToAddress extends React.Component {
 
   send = async () => {
     let { toAddress, amount } = this.state;
-    let { convertExchangeRate, currencyDisplay } = this.props
+    let { address, convertCurrency, currencyDisplay } = this.props
 
-    amount = convertExchangeRate(amount);
+    const displayCurrency = getStoredValue("currency", address);
+    amount = convertCurrency(amount, `USD/${displayCurrency}`);
     console.log("CONVERTED TO DOLLAR AMOUNT",amount)
 
     if(this.state.canSend){
@@ -227,7 +269,7 @@ export default class SendToAddress extends React.Component {
       <Input
         width={1}
         type="number"
-        placeholder="$0.00"
+        placeholder={this.props.currencyDisplay(0)}
         value={this.state.amount}
         ref={(input) => { this.amountInput = input; }}
         onChange={event => this.updateState('amount', event.target.value)}
@@ -239,7 +281,7 @@ export default class SendToAddress extends React.Component {
           width={1}
           type="number"
           readOnly
-          placeholder="$0.00"
+          placeholder={this.props.currencyDisplay(0)}
           value={this.state.amount}
           ref={(input) => { this.amountInput = input; }}
           onChange={event => this.updateState('amount', event.target.value)}
@@ -274,10 +316,27 @@ export default class SendToAddress extends React.Component {
             </CopyToClipboard>
           }</div>
 
-          <Field mb={3} label={i18n.t('send_to_address.send_amount')}>
+          <Field mb={3} label={i18n.t("send_to_address.send_amount")}>
             {amountInputDisplay}
-          </Field>
+            {/* TODO: i18n this with merging PR #195 */
+            this.state.currencyWarning ? (
+              <InputInfo color="blue">
+                {" "}
+                {`You've been requested to send ${new Intl.NumberFormat(
+                  getStoredValue("i18nextLng"),
+                  {
+                    style: "currency",
+                    currency: this.state.currency,
+                    maximumFractionDigits: 2
+                  }
+                ).format(this.state.requestedAmount)}.  We've converted this
+                            amount according to our latest known exchange rate to
+                              ${this.state.displayCurrency}.
 
+                            `}
+              </InputInfo>
+            ) : null}
+          </Field>
           <Field mb={3} label={messageText}>
             <Input
               width={1}
