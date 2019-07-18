@@ -340,7 +340,7 @@ export default class SendToAddress extends React.Component {
           {/* For Planet A and since messages currently don't work, we simply
               set them to display: "none".
             */}
-          <Field style={{display: "none"}} mb={3} label={messageText}>
+          <Field display="none" mb={3} label={messageText}>
             <Input
               width={1}
               type="text"
