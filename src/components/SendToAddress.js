@@ -337,7 +337,10 @@ export default class SendToAddress extends React.Component {
               </InputInfo>
             ) : null}
           </Field>
-          <Field mb={3} label={messageText}>
+          {/* For Planet A and since messages currently don't work, we simply
+              set them to display: "none".
+            */}
+          <Field display="none" mb={3} label={messageText}>
             <Input
               width={1}
               type="text"

@@ -23,17 +23,15 @@ import Receipt from "./components/Receipt";
 import MainCard from './components/MainCard';
 import History from './components/History';
 import Advanced from './components/Advanced';
-import MoreButtons from './components/MoreButtons';
 import RecentTransactions from './components/RecentTransactions';
 import Footer from './components/Footer';
 import Loader from './components/Loader';
 import burnerlogo from './assets/burnerwallet.png';
 import BurnWallet from './components/BurnWallet'
-import Exchange from './components/Exchange'
 import Bottom from './components/Bottom';
 import Card from './components/StyledCard';
 import incogDetect from './services/incogDetect.js'
-import { ThemeProvider, Text } from 'rimble-ui';
+import { ThemeProvider } from 'rimble-ui';
 import theme from "./theme";
 import getConfig from "./config";
 //https://github.com/lesnitsky/react-native-webview-messaging/blob/v1/examples/react-native/web/index.js
@@ -43,7 +41,6 @@ import dai from './assets/dai.png';
 import pdai from './assets/pdai.png';
 import base64url from 'base64url';
 import EthCrypto from 'eth-crypto';
-import styled from "styled-components";
 import { getStoredValue, storeValues, eraseStoredValue } from "./services/localStorage";
 
 let LOADERIMAGE = burnerlogo
@@ -91,12 +88,6 @@ const MAX_BLOCK_TO_LOOK_BACK = 512//don't look back more than 512 blocks
 
 let interval
 let intervalLong
-
-const Warning = styled(Text).attrs(()=>({
-  fontSize: 2,
-  color: "#F4511E",
-  textAlign: 'center'
-}))``;
 
 export default class App extends Component {
   constructor(props) {
@@ -847,15 +838,6 @@ export default class App extends Component {
               {web3 /*&& this.checkNetwork()*/ && (() => {
                 //console.log("VIEW:",view)
 
-                let moreButtons = (
-                  <MoreButtons
-                    buttonStyle={buttonStyle}
-                    changeView={this.changeView}
-                    isVendor={this.state.isVendor&&this.state.isVendor.isAllowed}
-                    expertMode={expertMode}
-                  />
-                )
-
                 let extraTokens = ""
 
                 let defaultBalanceDisplay = (
@@ -1000,9 +982,6 @@ export default class App extends Component {
                             currencyDisplay={this.currencyDisplay} />
                         )}
 
-                        {/* eslint-disable-next-line jsx-a11y/accessible-emoji */}
-                        <Warning>💀 This product is currently in early alpha. Use at your own risk! 💀</Warning>
-
                         <MainCard
                           buttonStyle={buttonStyle}
                           address={account}
@@ -1011,8 +990,6 @@ export default class App extends Component {
                           changeView={this.changeView}
                           currencyDisplay={this.currencyDisplay}
                         />
-
-                        {moreButtons}
 
                         <RecentTransactions
                           currencyDisplay={this.currencyDisplay}
@@ -1340,47 +1317,6 @@ export default class App extends Component {
                     </div>
                   );
 
-                  case 'exchange':
-                  return (
-                    <div>
-                      {this.state.scannerOpen ? sendByScan : null}
-                      <Card>
-                        <NavCard title={i18n.t('exchange_title')} goBack={this.goBack.bind(this)}/>
-                        <Exchange
-                          eth={eth}
-                          dai={dai}
-                          xdai={pdai}
-                          ethprice={this.state.ethprice}
-                          ethBalance={this.state.ethBalance}
-                          daiBalance={this.state.daiBalance}
-                          xdaiBalance={this.state.xdaiBalance}
-                          mainnetweb3={this.state.mainnetweb3}
-                          xdaiweb3={this.state.xdaiweb3}
-                          daiContract={this.state.daiContract}
-                          xdaiContract={this.state.xdaiContract}
-                          bridgeContract={this.state.bridgeContract}
-                          isVendor={this.state.isVendor}
-                          isAdmin={this.state.isAdmin}
-                          buttonStyle={buttonStyle}
-                          changeAlert={this.changeAlert}
-                          changeView={this.changeView}
-                          setGwei={this.setGwei}
-                          network={this.state.network}
-                          tx={this.state.tx}
-                          pTx={this.state.pTx}
-                          web3={this.state.web3}
-                          send={this.state.send}
-                          nativeSend={this.state.nativeSend}
-                          address={account}
-                          balance={balance}
-                          goBack={this.goBack.bind(this)}
-                          currencyDisplay={this.currencyDisplay}
-                          convertCurrency={this.convertCurrency}
-                          tokenSendV2={tokenSendV2.bind(this)}
-                        />
-                      </Card>
-                    </div>
-                  );
                   case 'loader':
                   return (
                     <div>
