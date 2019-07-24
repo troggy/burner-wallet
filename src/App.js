@@ -46,6 +46,7 @@ import { fetchAllPassports } from "./services/plasma";
 import PlanetAMoreButtons from "./planeta/MoreButtons";
 import PlanetAStartHandshake from "./planeta/StartHandshake";
 import PlanetAFinalizeHandshake from "./planeta/FinalizeHandshake";
+import PlanetAPlantTrees from "./planeta/PlantTrees";
 
 let LOADERIMAGE = burnerlogo
 let HARDCODEVIEW// = "loader"// = "receipt"
@@ -994,6 +995,31 @@ export default class App extends Component {
                       />
                     </div>
                   );
+                  case 'planet_a_plant_trees':
+                  return (
+                    <div>
+                      {this.state.scannerOpen ? sendByScan : null}
+                      <Card>
+                        <NavCard title="Start Handshake" goBack={this.goBack.bind(this)}/>
+                        <PlanetAPlantTrees
+                            changeAlert={this.changeAlert}
+                            changeView={this.changeView}
+                            goBack={this.goBack.bind(this)}
+                            scannerState={this.state.scannerState}
+                            web3={this.state.web3}
+                            plasma={this.state.xdaiweb3}
+                            metaAccount={this.state.metaAccount}
+                            defaultPassport={defaultPassport}
+                            currencyDisplay={this.currencyDisplay}
+                            setReceipt={this.setReceipt}
+                        />
+                      </Card>
+                      <Bottom
+                        text="Cancel"
+                        action={this.goBack.bind(this)}
+                      />
+                    </div>
+                  );
                   case 'main':
                   return (
                     <div>
@@ -1006,6 +1032,8 @@ export default class App extends Component {
                           changeView={this.changeView}
                           defaultPassport={defaultPassport}
                           changeAlert={this.changeAlert}
+                          plasma={this.state.xdaiweb3}
+                          metaAccount={this.state.metaAccount}
                         />
                         <MainCard
                           buttonStyle={buttonStyle}

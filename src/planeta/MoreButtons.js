@@ -2,7 +2,7 @@ import React from "react";
 import { Flex, Icon, Box } from "rimble-ui";
 import { PrimaryButton } from "../components/Buttons";
 
-export default ({ changeView, defaultPassport, changeAlert }) => {
+export default ({ changeView, defaultPassport, changeAlert, plasma, metaAccount}) => {
   const passportAlert = () =>
     changeAlert({ type: "warning", message: "Select a passport" });
   return (
@@ -27,15 +27,12 @@ export default ({ changeView, defaultPassport, changeAlert }) => {
       <Box flex={1} m={2}>
         <PrimaryButton
           fullWidth
-          onClick={() => {
-            changeAlert({ type: "warning", message: "Not yet implemented" });
-            /*
+          onClick={async () => {
             if (defaultPassport) {
               changeView("planet_a_plant_trees");
             } else {
               passportAlert();
             }
-            */
           }}
         >
           <Flex mx={-2} alignItems="center">
