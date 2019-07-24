@@ -103,29 +103,31 @@ export async function finalizeHandshake(plasma, passport, receipt, privateKey) {
   let txHash, finalReceipt;
   let rounds = 50;
 
+  try {
+    txHash = await _finalizeHandshake(plasma, passport, receipt, privateKey);
+  } catch(err) {
+    // ignore for now
+    console.log("error finalizing handshake", err);
+    // NOTE: Leap's node currently doesn't implement the "newBlockHeaders"
+    // JSON-RPC call. When a transaction is rejected by a node,
+    // sendSignedTransaction hence throws an error. We simply ignore this
+    // error here and use the polling tactic below. For more details see:
+    // https://github.com/leapdao/leap-node/issues/255
+
+    // const messageToIgnore = "Failed to subscribe to new newBlockHeaders to confirm the transaction receipts.";
+    // NOTE: In the case where we want to ignore web3's error message, there's
+    // "\r\n {}" included in the error message, which is why we cannot
+    // compare with the equal operator, but have to use String.includes.
+    // if (!err.message.includes(messageToIgnore)) {
+    //  throw err;
+    // }
+  }
+
   while (rounds--) {
     // redundancy rules ✊
-    try {
-      txHash = await _finalizeHandshake(plasma, passport, receipt, privateKey);
-    } catch(err) {
-      // ignore for now
-      console.log("error finalizing handshake", err);
-      // NOTE: Leap's node currently doesn't implement the "newBlockHeaders"
-      // JSON-RPC call. When a transaction is rejected by a node,
-      // sendSignedTransaction hence throws an error. We simply ignore this
-      // error here and use the polling tactic below. For more details see:
-      // https://github.com/leapdao/leap-node/issues/255
-
-      // const messageToIgnore = "Failed to subscribe to new newBlockHeaders to confirm the transaction receipts.";
-      // NOTE: In the case where we want to ignore web3's error message, there's
-      // "\r\n {}" included in the error message, which is why we cannot
-      // compare with the equal operator, but have to use String.includes.
-      // if (!err.message.includes(messageToIgnore)) {
-      //  throw err;
-      // }
-    }
 
     let res = await plasma.eth.getTransaction(txHash)
+      console.log("albi", res, txHash);
 
     if (res && res.blockHash) {
       finalReceipt = res;
@@ -143,7 +145,6 @@ export async function finalizeHandshake(plasma, passport, receipt, privateKey) {
   }
 }
 
-
 async function _finalizeHandshake(plasma, passport, receipt, privateKey) {
   const gt = lower => o => (new BN(o.output.value)).gt((new BN(lower)).mul(factor18));
    // Select a random element from a list, see below for usage
@@ -158,12 +159,13 @@ async function _finalizeHandshake(plasma, passport, receipt, privateKey) {
   );
 
   // TODO: remove filters.
-  const earthLeapOutput = choice((await plasma.getUnspent(EarthContractData.address, LEAP_COLOR)).filter(gt(0.0001)));
+  const earthLeapOutput = choice(await plasma.getUnspent(EarthContractData.address, LEAP_COLOR))
   const earthCO2Output = choice((await plasma.getUnspent(EarthContractData.address, CO2_COLOR)).filter(gt(20)))
   const earthGoellarsOutput = choice((await plasma.getUnspent(
     EarthContractData.address,
     GOELLARS_COLOR
-  )).filter(gt(1)))
+  )).filter(gt("1")))
+  console.log("hello", earthLeapOutput, earthCO2Output, earthGoellarsOutput, theirPassportOutput, passport);
 
   const earthContract = new PlasmaContract(plasma, EarthContractData.abi);
   return await earthContract.methods
